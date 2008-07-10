@@ -16,7 +16,8 @@ class sfFormtasticBase extends sfForm
   protected
     $validatorSchemaClass = 'sfValidatornatorSchemaBase',
     $widgetSchemaClass    = 'sfWidgetasticFormSchemaBase',
-    $errorSchemaClass     = 'sfValidatornatorErrorSchemaBase';
+    $errorSchemaClass     = 'sfValidatornatorErrorSchemaBase',
+    $formFieldSchemaClass = 'sfFormtasticFieldSchemaBase';
   
   /**
    * @see sfForm
@@ -51,6 +52,20 @@ class sfFormtasticBase extends sfForm
   }
   
   /**
+   * @see sfForm
+   */
+  public function getFormFieldSchema()
+  {
+    if (is_null($this->formFieldSchema))
+    {
+      $formFieldSchemaClass = $this->formFieldSchemaClass;
+      $this->formFieldSchema = new $formFieldSchemaClass($this->widgetSchema, null, null, $this->isBound ? $this->taintedValues : $this->defaults, $this->errorSchema);
+    }
+    
+    return $this->formFieldSchema;
+  }
+  
+  /**
    * Render all hidden fields.
    * 
    * @return  string
@@ -58,9 +73,9 @@ class sfFormtasticBase extends sfForm
   public function renderHiddenFields()
   {
     $rendered = array();
-    foreach ($this->widgetSchema->getHiddenWidgets() as $widget)
+    foreach ($this->getFormFieldSchema()->getHiddenFields() as $field)
     {
-      $rendered[] = $widget->render();
+      $rendered[] = $field->render();
     }
     
     return join("\n", $rendered);

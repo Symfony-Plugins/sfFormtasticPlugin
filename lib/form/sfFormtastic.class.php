@@ -15,5 +15,6 @@ class sfFormtastic extends sfFormtasticBase
   protected
     $validatorSchemaClass = 'sfValidatornatorSchema',
     $widgetSchemaClass    = 'sfWidgetasticFormSchema',
-    $errorSchemaClass     = 'sfValidatornatorErrorSchema';
+    $errorSchemaClass     = 'sfValidatornatorErrorSchema',
+    $formFieldSchemaClass = 'sfFormtasticFieldSchema';
 }
