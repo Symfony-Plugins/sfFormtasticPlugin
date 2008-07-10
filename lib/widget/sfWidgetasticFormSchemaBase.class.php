@@ -13,4 +13,13 @@
  */
 class sfWidgetasticFormSchemaBase extends sfWidgetFormSchema
 {
+  /**
+   * @see sfWidgetFormSchema
+   */
+  public function __construct($fields = null, $options = array(), $attributes = array(), $labels = array(), $helps = array())
+  {
+    parent::__construct($fields, $options, $attributes, $labels, $helps);
+    
+    $this->addFormFormatter('dl', new sfWidgetasticFormFormatterDefinitionList);
+  }
 }
