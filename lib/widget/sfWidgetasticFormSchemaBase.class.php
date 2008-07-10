@@ -22,4 +22,22 @@ class sfWidgetasticFormSchemaBase extends sfWidgetFormSchema
     
     $this->addFormFormatter('dl', new sfWidgetasticFormFormatterDefinitionList);
   }
+  
+  /**
+   * @return array All hidden form widgets
+   */
+  public function getHiddenWidgets()
+  {
+    $hiddenWidgets = array();
+    foreach ($this->positions as $name)
+    {
+      $widget = $this[$name];
+      if ($widget instanceof sfWidgetForm && $widget->isHidden())
+      {
+        $hiddenWidgets[] = $widget;
+      }
+    }
+    
+    return $hiddenWidgets;
+  }
 }

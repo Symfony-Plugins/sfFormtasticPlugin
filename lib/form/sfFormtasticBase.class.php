@@ -43,5 +43,12 @@ class sfFormtasticBase extends sfForm
    */
   public function renderHiddenFields()
   {
+    $rendered = array();
+    foreach ($this->widgetSchema->getHiddenWidgets() as $widget)
+    {
+      $rendered[] = $widget->render();
+    }
+    
+    return join("\n", $rendered);
   }
 }
