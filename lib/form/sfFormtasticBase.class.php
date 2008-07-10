@@ -14,17 +14,31 @@
 class sfFormtasticBase extends sfForm
 {
   protected
-    $widgetSchemaClass = 'sfWidgetasticFormSchemaBase';
+    $validatorSchemaClass = 'sfValidatornatorSchemaBase',
+    $widgetSchemaClass    = 'sfWidgetasticFormSchemaBase',
+    $errorSchemaClass     = 'sfValidatornatorErrorSchemaBase';
   
   /**
    * @see sfForm
    */
   public function __construct($defaults = array(), $options = array(), $CSRFSecret = null)
   {
-    parent::__construct($defaults, $options, $CSRFSecret);
+    $this->setDefaults($defaults);
+    $this->options = $options;
     
-    $widgetSchemaClass = $this->widgetSchemaClass;
-    $this->widgetSchema = new $widgetSchemaClass;
+    $validatorSchemaClass = $this->validatorSchemaClass;
+    $widgetSchemaClass    = $this->widgetSchemaClass;
+    $errorSchemaClass     = $this->errorSchemaClass;
+    
+    $this->validatorSchema = new $validatorSchemaClass;
+    $this->widgetSchema    = new $widgetSchemaClass;
+    $this->errorSchema     = new $errorSchemaClass($this->validatorSchema);
+    
+    $this->setup();
+    $this->configure();
+    
+    $this->addCSRFProtection($CSRFSecret);
+    $this->resetFormFields();
   }
   
   /**
