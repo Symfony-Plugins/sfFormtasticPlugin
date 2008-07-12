@@ -1,0 +1,9 @@
+myFirstExampleForm:
+  fields:
+    id:     ~
+    name:   ~
+    email:  ~
+
+mySecondExampleForm:
+  fields:
+    id:     ~
