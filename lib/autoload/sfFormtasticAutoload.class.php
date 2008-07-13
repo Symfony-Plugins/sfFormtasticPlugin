@@ -133,6 +133,8 @@ class sfFormtasticAutoload
   
   /**
    * Reloads cache.
+   * 
+   * @todo A more elegant usage of sfFinder...
    */
   public function reload()
   {
