@@ -14,6 +14,9 @@
 class sfFormtasticBase extends sfForm
 {
   protected
+    $localCSRFProtection  = null,
+    $localCSRFSecret      = null,
+    
     $validatorSchemaClass = 'sfValidatornatorSchemaBase',
     $widgetSchemaClass    = 'sfWidgetasticFormSchemaBase',
     $errorSchemaClass     = 'sfValidatornatorErrorSchemaBase',
@@ -40,6 +43,10 @@ class sfFormtasticBase extends sfForm
     
     $this->addCSRFProtection($CSRFSecret);
     $this->resetFormFields();
+    
+    // store local CSRF flag and secret
+    $this->localCSRFSecret = $CSRFSecret;
+    $this->localCSRFProtection = $this->isCSRFProtected();
   }
   
   /**
@@ -66,12 +73,24 @@ class sfFormtasticBase extends sfForm
   }
   
   /**
+   * @see sfForm
+   */
+  public function render($attributes = array())
+  {
+    $this->checkCSRFField();
+    
+    return parent::render($attributes);
+  }
+  
+  /**
    * Render all hidden fields.
    * 
    * @return  string
    */
   public function renderHiddenFields()
   {
+    $this->checkCSRFField();
+    
     $rendered = array();
     foreach ($this->getFormFieldSchema()->getHiddenFields() as $field)
     {
@@ -79,5 +98,16 @@ class sfFormtasticBase extends sfForm
     }
     
     return join("\n", $rendered);
+  }
+  
+  /**
+   * Make sure the CSRF field is there.
+   */
+  protected function checkCSRFField()
+  {
+    if ($this->localCSRFProtection && !$this->isCSRFProtected())
+    {
+      $this->addCSRFProtection($this->localCSRFSecret);
+    }
   }
 }

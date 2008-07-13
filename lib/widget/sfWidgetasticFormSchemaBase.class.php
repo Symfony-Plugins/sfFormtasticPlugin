@@ -22,4 +22,12 @@ class sfWidgetasticFormSchemaBase extends sfWidgetFormSchema
     
     $this->addFormFormatter('dl', new sfWidgetasticFormSchemaFormatterDefinitionList($this));
   }
+  
+  /**
+   * @see sfWidgetFormSchema::offsetSet()
+   */
+  public function add($name, $widget)
+  {
+    $this[$name] = $widget;
+  }
 }

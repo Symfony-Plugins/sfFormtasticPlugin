@@ -13,4 +13,11 @@
  */
 class sfValidatornatorSchemaBase extends sfValidatorSchema
 {
+  /**
+   * @see sfValidatorBase::offsetSet()
+   */
+  public function add($name, $validator)
+  {
+    $this[$name] = $validator;
+  }
 }
