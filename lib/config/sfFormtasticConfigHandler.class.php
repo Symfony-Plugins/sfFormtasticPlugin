@@ -29,13 +29,23 @@ class sfFormtasticConfigHandler extends sfYamlConfigHandler
     $this->data[] = '';
     
     // parse the yaml
-    foreach (self::getConfiguration($configFiles) as $class => $config)
+    foreach ($this->getConfiguration($configFiles) as $class => $config)
     {
       $this->class  = $class;
       $this->config = $config;
       
+      $this->data[] = '/**';
+      $this->data[] = ' * '.$class.' form.';
+      $this->data[] = ' * ';
+      $this->data[] = ' * @package    symfony';
+      $this->data[] = ' * @subpackage form';
+      $this->data[] = ' * @version    SVN: $Id$';
+      $this->data[] = ' */';
       $this->data[] = 'class '.$class.' extends sfFormtastic';
       $this->data[] = '{';
+      $this->data[] = '  /**';
+      $this->data[] = '   * @see sfForm';
+      $this->data[] = '   */';
       $this->data[] = '  public function configure()';
       $this->data[] = '  {';
       
@@ -79,10 +89,10 @@ class sfFormtasticConfigHandler extends sfYamlConfigHandler
       $this->data[] = '    $this->setWidgets(array(';
       foreach ($widgets as $name => $widget)
       {
-        $this->data[] = sprintf('      %s => %s,', var_export($name, true), $widget);
+        $this->data[] = sprintf('      %s => %s,', $this->varExport($name), $widget);
       }
       $this->data[] = '    ));';
-      $this->data[] = '    ';
+      $this->data[] = '';
     }
   }
   
@@ -91,35 +101,159 @@ class sfFormtasticConfigHandler extends sfYamlConfigHandler
    */
   protected function addValidators()
   {
-    $validators = array();
-    if (isset($this->config['fields']))
+    $formValidators = array();
+    foreach ($this->config['fields'] as $name => $config)
     {
-      foreach ($this->config['fields'] as $name => $config)
+      $validators = array();
+      
+      $required = isset($config['required']);
+      $requiredMessage = isset($config['required']['msg']) ? $config['required']['msg'] : null;
+      
+      // validator configuration
+      if (is_array($config))
       {
-        switch ($name)
+        foreach ($config as $validator => $params)
         {
-          case 'id':
-          $validators[$name] = 'new sfValidatorInteger';
-          break;
-          
-          case 'email':
-          $validators[$name] = 'new sfValidatorEmail';
-          
-          default:
-          $validators[$name] = 'new sfValidatorPass';
+          if (class_exists($validator))
+          {
+            $rc = new ReflectionClass($validator);
+            if ($rc->isSubclassOf(new ReflectionClass('sfValidatorBase')))
+            {
+              $options = array();
+              $messages = array();
+              
+              if (!$required)
+              {
+                $options['required'] = false;
+              }
+              
+              if (is_array($params))
+              {
+                foreach ($params as $key => $value)
+                {
+                  if (in_array($key, array('invalid', 'error')))
+                  {
+                    $messages['invalid'] = $value;
+                  }
+                  elseif (preg_match('/^(\w+)_error$/', $key, $match))
+                  {
+                    $messages[$match[1]] = $value;
+                  }
+                  else
+                  {
+                    $options[$key] = $value;
+                  }
+                }
+              }
+              
+              $validators[] = array($validator, $options, $messages);
+            }
+          }
         }
       }
+      
+      // smart-configure validator based on field name
+      if (!$validators)
+      {
+        $options = array();
+        if (!$required)
+        {
+          $options['required'] = false;
+        }
+        
+        if (false !== strpos($name, 'email'))
+        {
+          $validators[] = array('sfValidatorEmail', $options, array());
+        }
+        elseif ('id' == $name)
+        {
+          $validators[] = array('sfValidatorInteger', $options, array());
+        }
+        else
+        {
+          if ($required)
+          {
+            $validators[] = array('sfValidatorString', array(), array());
+          }
+          else
+          {
+            $validators[] = array('sfValidatorPass', array(), array());
+          }
+        }
+      }
+      
+      $formValidators[$name] = array($validators, $required, $requiredMessage);
     }
     
-    if (count($validators))
+    // build call to ->setValidators()
+    if (count($formValidators))
     {
       $this->data[] = '    $this->setValidators(array(';
-      foreach ($validators as $name => $validator)
+      foreach ($formValidators as $name => $formValidator)
       {
-        $this->data[] = sprintf('      %s => %s,', var_export($name, true), $validator);
+        list($validators, $required, $requiredMessage) = $formValidator;
+        
+        if (count($validators) > 1)
+        {
+          // use sfValidatorAnd
+          $this->data[] = sprintf('      %s => new sfValidatorAnd(array(', $this->varExport($name));
+          foreach ($validators as $validator)
+          {
+            $this->data[] = '        '.$this->buildValidator($validator).',';
+          }
+          
+          $options = array();
+          $messages = array();
+          
+          if (!$required)
+          {
+            $options['required'] = false;
+          }
+          elseif ($requiredMessage)
+          {
+            $messages['required'] = $requiredMessage;
+          }
+          
+          $this->data[] = sprintf('      ), %s, %s),', $this->varExport($options), $this->varExport($messages));
+        }
+        else
+        {
+          $this->data[] = sprintf('      %s => %s,', $this->varExport($name), $this->buildValidator($validators[0], $requiredMessage));
+        }
       }
       $this->data[] = '    ));';
-      $this->data[] = '    ';
+      $this->data[] = '';
+    }
+  }
+  
+  /**
+   * Build a validator instantiation.
+   * 
+   * @param   array   $params
+   * @param   string  $requiredMessage
+   * 
+   * @return  string
+   */
+  protected function buildValidator($params, $requiredMessage = null)
+  {
+    list($validator, $options, $messages) = $params;
+    
+    if ($requiredMessage)
+    {
+      $messages['required'] = $requiredMessage;
+    }
+    
+    if (count($messages))
+    {
+      return sprintf('new %s(%s, %s)', $validator, $this->varExport($options), $this->varExport($messages));
+    }
+    elseif (count($options))
+    {
+      return sprintf('new %s(%s)', $validator, $this->varExport($options));
+    }
+    else
+    {
+      return sprintf('new %s', $validator);
     }
   }
   
@@ -135,6 +269,26 @@ class sfFormtasticConfigHandler extends sfYamlConfigHandler
    */
   protected function addHelps()
   {
+  }
+  
+  /**
+   * Export and clean up whitespace.
+   * 
+   * @param   mixed $var
+   * 
+   * @return  string
+   */
+  protected function varExport($var)
+  {
+    $export = var_export($var, true);
+    
+    if (0 === strpos($export, 'array ('))
+    {
+      $export = preg_replace('/\s+/', ' ', $export);
+      $export = str_replace(array(' ( ', ', )'), array('(', ')'), $export);
+    }
+    
+    return $export;
   }
   
   /**

@@ -1,9 +1,15 @@
-myFirstExampleForm:
+myExampleForm:
   fields:
-    id:     ~
-    name:   ~
-    email:  ~
-
-mySecondExampleForm:
-  fields:
-    id:     ~
+    name:
+      required:
+        msg:                Please enter your name.
+      sfValidatorString:
+        min_length:         2
+        min_length_error:   Your name must be at least two characters long.
+        max_length:         255
+        max_length_error:   Your name cannot be longer than 255 characters.
+    email:
+      required:
+        msg:                Please enter your email address.
+      sfValidatorString:    ~
+      sfValidatorEmail:     ~
