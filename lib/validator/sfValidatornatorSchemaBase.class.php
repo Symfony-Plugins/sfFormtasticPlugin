@@ -14,10 +14,34 @@
 class sfValidatornatorSchemaBase extends sfValidatorSchema
 {
   /**
-   * @see sfValidatorBase::offsetSet()
+   * @see sfValidatorSchema::offsetExists()
    */
-  public function add($name, $validator)
+  public function has($name)
+  {
+    return isset($this[$name]);
+  }
+  
+  /**
+   * @see sfValidatorSchema::offsetGet()
+   */
+  public function get($name)
+  {
+    return $this[$name];
+  }
+  
+  /**
+   * @see sfValidatorSchema::offsetSet()
+   */
+  public function add($name, sfValidatorBase $validator)
   {
     $this[$name] = $validator;
+  }
+  
+  /**
+   * @see sfValidatorSchema::offsetUnset()
+   */
+  public function remove($name)
+  {
+    unset($this[$name]);
   }
 }

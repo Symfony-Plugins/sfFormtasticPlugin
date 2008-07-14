@@ -13,6 +13,9 @@
  */
 class sfFormtasticBase extends sfForm
 {
+  static protected
+    $defaultValidator = null;
+  
   protected
     $localCSRFProtection  = null,
     $localCSRFSecret      = null,
@@ -21,6 +24,31 @@ class sfFormtasticBase extends sfForm
     $widgetSchemaClass    = 'sfWidgetasticFormSchemaBase',
     $errorSchemaClass     = 'sfValidatornatorErrorSchemaBase',
     $formFieldSchemaClass = 'sfFormtasticFieldSchemaBase';
+  
+  /**
+   * Set the default validator used by ->addField().
+   * 
+   * @param   sfValidatorBase $validator
+   */
+  static public function setDefaultValidator(sfValidatorBase $validator)
+  {
+    self::$defaultValidator = $validator;
+  }
+  
+  /**
+   * Get the default validator used by ->addField().
+   * 
+   * @return  sfValidatorBase
+   */
+  static public function getDefaultValidator()
+  {
+    if (is_null(self::$defaultValidator))
+    {
+      self::$defaultValidator = new sfValidatorPass;
+    }
+    
+    return self::$defaultValidator;
+  }
   
   /**
    * @see sfForm
@@ -98,6 +126,50 @@ class sfFormtasticBase extends sfForm
     }
     
     return join("\n", $rendered);
+  }
+  
+  /**
+   * Add a field.
+   * 
+   * @param   string          $name
+   * @param   sfWidget        $widget
+   * @param   sfValidatorBase $validator
+   */
+  public function addField($name, sfWidget $widget, sfValidatorBase $validator = null)
+  {
+    if ($this->isBound())
+    {
+      throw new LogicException('Fields cannot be added to a bound form');
+    }
+    
+    $this->widgetSchema[$name] = $widget;
+    $this->validatorSchema[$name] = is_null($validator) ? clone $this->getDefaultValidator() : $validator;
+    
+    $this->resetFormFields();
+  }
+  
+  /**
+   * @see sfForm::offsetExists()
+   */
+  public function hasField($name)
+  {
+    return isset($this[$name]);
+  }
+  
+  /**
+   * @see sfForm::offsetGet()
+   */
+  public function getField($name)
+  {
+    return $this[$name];
+  }
+  
+  /**
+   * @see sfForm::offsetUnset()
+   */
+  public function removeField($name)
+  {
+    unset($name);
   }
   
   /**

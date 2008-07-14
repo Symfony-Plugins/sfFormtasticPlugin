@@ -24,10 +24,34 @@ class sfWidgetasticFormSchemaBase extends sfWidgetFormSchema
   }
   
   /**
+   * @see sfWidgetFormSchema::offsetExists()
+   */
+  public function has($name)
+  {
+    return isset($this[$name]);
+  }
+  
+  /**
+   * @see sfWidgetFormSchema::offsetGet()
+   */
+  public function get($name)
+  {
+    return $this[$name];
+  }
+  
+  /**
    * @see sfWidgetFormSchema::offsetSet()
    */
-  public function add($name, $widget)
+  public function add($name, sfWidget $widget)
   {
     $this[$name] = $widget;
+  }
+  
+  /**
+   * @see sfWidgetFormSchema::offsetUnset()
+   */
+  public function remove($name)
+  {
+    unset($this[$name]);
   }
 }
