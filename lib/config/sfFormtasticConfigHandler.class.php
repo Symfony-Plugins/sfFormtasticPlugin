@@ -34,6 +34,20 @@ class sfFormtasticConfigHandler extends sfYamlConfigHandler
       $this->class  = $class;
       $this->config = $config;
       
+      $extends = 'sfFormtastic';
+      if (isset($this->config['extends']) && class_exists($this->config['extends']))
+      {
+        $rc = new ReflectionClass($this->config['extends']);
+        if ($rc->isSubclassOf(new ReflectionClass('sfForm')))
+        {
+          $extends = $this->config['extends'];
+        }
+        else
+        {
+          throw new LogicException(sprintf('The class "%s" is not an extension of sfForm', $this->config['extends']));
+        }
+      }
+      
       $this->data[] = '/**';
       $this->data[] = ' * '.$class.' form.';
       $this->data[] = ' * ';
@@ -41,13 +55,19 @@ class sfFormtasticConfigHandler extends sfYamlConfigHandler
       $this->data[] = ' * @subpackage form';
       $this->data[] = ' * @version    SVN: $Id$';
       $this->data[] = ' */';
-      $this->data[] = 'class '.$class.' extends sfFormtastic';
+      $this->data[] = 'class '.$class.' extends '.$extends;
       $this->data[] = '{';
       $this->data[] = '  /**';
       $this->data[] = '   * @see sfForm';
       $this->data[] = '   */';
       $this->data[] = '  public function configure()';
       $this->data[] = '  {';
+      
+      if ('sfFormtastic' != $extends)
+      {
+        $this->data[] = '    parent::configure();';
+        $this->data[] = '';
+      }
       
       $this->addWidgets();
       $this->addValidators();

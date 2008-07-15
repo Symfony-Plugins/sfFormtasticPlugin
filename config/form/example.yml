@@ -1,4 +1,5 @@
 myExampleForm:
+  extends:                  sfGuardUserForm
   fields:
     name:
       required:
