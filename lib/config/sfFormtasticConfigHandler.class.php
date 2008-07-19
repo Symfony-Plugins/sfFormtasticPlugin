@@ -10,6 +10,34 @@
  */
 class sfFormtasticConfigHandler extends sfYamlConfigHandler
 {
+  static protected
+    $typeToWidgetMap = array(
+      'date'      => 'sfWidgetFormDate',
+      'datetime'  => 'sfWidgetFormDateTime',
+      'timestamp' => 'sfWidgetFormDateTime',
+      'input'     => 'sfWidgetFormInput',
+      'checkbox'  => 'sfWidgetFormInputCheckbox',
+      'file'      => 'sfWidgetFormInputFile',
+      'upload'    => 'sfWidgetFormInputFile',
+      'hidden'    => 'sfWidgetFormInputHidden',
+      'password'  => 'sfWidgetFormInputPassword',
+      'select'    => 'sfWidgetFormSelect',
+      'dropdown'  => 'sfWidgetFormSelect',
+      'many'      => 'sfWidgetFormSelectMany',
+      'radio'     => 'sfWidgetFormSelectRadio',
+      'textarea'  => 'sfWidgetFormTextarea',
+      'time'      => 'sfWidgetFormTime',
+    ),
+    $impliedValidatorMap = array(
+      'sfWidgetFormDate'        => 'sfValidatorDate',
+      'sfWidgetFormDateTime'    => 'sfValidatorDateTime',
+      'sfWidgetFormInputFile'   => 'sfValidatorFile',
+      'sfWidgetFormSelect'      => 'sfValidatorChoice',
+      'sfWidgetFormSelectMany'  => 'sfValidatorChoiceMany',
+      'sfWidgetFormSelectRadio' => 'sfValidatorChoice',
+      'sfWidgetFormTime'        => 'sfValidatorTime',
+    );
+  
   protected
     $data   = array(),
     $class  = null,
@@ -35,16 +63,23 @@ class sfFormtasticConfigHandler extends sfYamlConfigHandler
       $this->config = $config;
       
       $extends = 'sfFormtastic';
-      if (isset($this->config['extends']) && class_exists($this->config['extends']))
+      if (isset($this->config['extends']))
       {
-        $rc = new ReflectionClass($this->config['extends']);
-        if ($rc->isSubclassOf(new ReflectionClass('sfForm')))
+        if (class_exists($this->config['extends']))
         {
-          $extends = $this->config['extends'];
+          $rc = new ReflectionClass($this->config['extends']);
+          if ($rc->isSubclassOf(new ReflectionClass('sfForm')))
+          {
+            $extends = $this->config['extends'];
+          }
+          else
+          {
+            throw new InvalidArgumentException(sprintf('The class "%s" is not an extension of sfForm', $this->config['extends']));
+          }
         }
         else
         {
-          throw new LogicException(sprintf('The class "%s" is not an extension of sfForm', $this->config['extends']));
+          throw new InvalidArgumentException(sprintf('The class "%s" could not be found', $this->config['extends']));
         }
       }
       
@@ -53,6 +88,7 @@ class sfFormtasticConfigHandler extends sfYamlConfigHandler
       $this->data[] = ' * ';
       $this->data[] = ' * @package    symfony';
       $this->data[] = ' * @subpackage form';
+      $this->data[] = ' * @author     Auto-generated from YAML';
       $this->data[] = ' * @version    SVN: $Id$';
       $this->data[] = ' */';
       $this->data[] = 'class '.$class.' extends '.$extends;
@@ -74,6 +110,11 @@ class sfFormtasticConfigHandler extends sfYamlConfigHandler
       $this->addLabels();
       $this->addHelps();
       
+      if (isset($this->config['name_format']))
+      {
+        $this->data[] = sprintf('    $this->widgetSchema->setNameFormat(%s);', $this->varExport($this->config['name_format']));
+      }
+      
       $this->data[] = '  }';
       $this->data[] = '}';
       $this->data[] = '';
@@ -92,27 +133,132 @@ class sfFormtasticConfigHandler extends sfYamlConfigHandler
     {
       foreach ($this->config['fields'] as $name => $config)
       {
-        switch ($name)
+        $widget     = 'sfWidgetFormInput';
+        $options    = isset($config['options']) ? $config['options'] : array();
+        $attributes = isset($config['attributes']) ? $config['attributes'] : array();
+        
+        if (isset($config['type']))
         {
-          case 'id':
-          $widgets[$name] = 'new sfWidgetFormInputHidden';
-          break;
-          
-          default:
-          $widgets[$name] = 'new sfWidgetFormInput';
+          $widget = $this->convertTypeToWidgetClass($config['type']);
         }
+        else
+        {
+          // smart-configure based on field name
+          switch ($name)
+          {
+            case 'id':
+            $widget = 'sfWidgetFormInputHidden';
+            break;
+          }
+        }
+        
+        $this->configureImpliedValidator($name, $widget, $options);
+        
+        $widgets[$name] = array($widget, $options, $attributes);
       }
     }
     
+    // build call to ->setWidgets()
     if (count($widgets))
     {
       $this->data[] = '    $this->setWidgets(array(';
-      foreach ($widgets as $name => $widget)
+      foreach ($widgets as $name => $params)
       {
-        $this->data[] = sprintf('      %s => %s,', $this->varExport($name), $widget);
+        $this->data[] = sprintf('      %s => %s,', $this->varExport($name), $this->buildWidget($params));
       }
       $this->data[] = '    ));';
       $this->data[] = '';
+    }
+  }
+  
+  /**
+   * Convert a user-friendly "type" value to a widget class.
+   * 
+   * @param   string $type
+   * 
+   * @return  string A subclass of sfWidget
+   */
+  protected function convertTypeToWidgetClass($type)
+  {
+    static $map = null;
+    
+    if (is_null($map))
+    {
+      $map = array_merge(self::$typeToWidgetMap, sfConfig::get('app_sf_formtastic_plugin_type_to_widget_map', array()));
+    } 
+    
+    $widgetClass = isset($map[$type]) ? $map[$type] : $type;
+    if (class_exists($widgetClass))
+    {
+      $rc = new ReflectionClass($widgetClass);
+      if (!$rc->isSubclassOf(new ReflectionClass('sfWidget')))
+      {
+        throw new InvalidArgumentException(sprintf('The class "%s" is not a subclass of sfWidget', $widgetClass));
+      }
+    }
+    else
+    {
+      throw new InvalidArgumentException(sprintf('The class "%s" could not be found', $widgetClass));
+    }
+    
+    return $widgetClass;
+  }
+  
+  /**
+   * Add an implied validator to the form configuration.
+   * 
+   * @param   string  $name
+   * @param   string  $widget
+   * @param   array   $widgetOptions
+   */
+  protected function configureImpliedValidator($name, $widget, $widgetOptions = array())
+  {
+    if (isset(self::$impliedValidatorMap[$widget]))
+    {
+      $validator = self::$impliedValidatorMap[$widget];
+      
+      $validatorParams = array();
+      if (false !== strpos($validator, 'Choice'))
+      {
+        if (isset($widgetOptions['choices']))
+        {
+          $validatorParams['choices'] = $widgetOptions['choices'];
+        }
+      }
+      
+      if (isset($this->config['fields'][$name][$validator]))
+      {
+        $this->config['fields'][$name][$validator] = array_merge($validatorParams, (array) $this->config['fields'][$name][$validator]);
+      }
+      else
+      {
+        $this->config['fields'][$name][$validator] = $validatorParams;
+      }
+    }
+  }
+  
+  /**
+   * Build a widget instantiation.
+   * 
+   * @param   array $params
+   * 
+   * @return  string
+   */
+  protected function buildWidget($params = array())
+  {
+    list($widget, $options, $attributes) = $params;
+    
+    if (count($attributes))
+    {
+      return sprintf('new %s(%s, %s)', $widget, $this->varExport($options), $this->varExport($attributes));
+    }
+    elseif (count($options))
+    {
+      return sprintf('new %s(%s)', $widget, $this->varExport($options));
+    }
+    else
+    {
+      return sprintf('new %s', $widget);
     }
   }
   
@@ -166,14 +312,14 @@ class sfFormtasticConfigHandler extends sfYamlConfigHandler
                 }
               }
               
-              $validators[] = array($validator, $options, $messages);
+              $validators[$validator] = array($options, $messages);
             }
           }
         }
       }
       
       // smart-configure validator based on field name
-      if (!$validators)
+      if (!count($validators))
       {
         $options = array();
         if (!$required)
@@ -183,21 +329,21 @@ class sfFormtasticConfigHandler extends sfYamlConfigHandler
         
         if (false !== strpos($name, 'email'))
         {
-          $validators[] = array('sfValidatorEmail', $options, array());
+          $validators['sfValidatorEmail'] = array($options, array());
         }
         elseif ('id' == $name)
         {
-          $validators[] = array('sfValidatorInteger', $options, array());
+          $validators['sfValidatorInteger'] = array($options, array());
         }
         else
         {
           if ($required)
           {
-            $validators[] = array('sfValidatorString', array(), array());
+            $validators['sfValidatorString'] = array(array(), array());
           }
           else
           {
-            $validators[] = array('sfValidatorPass', array(), array());
+            $validators['sfValidatorPass'] = array(array(), array());
           }
         }
       }
@@ -217,9 +363,9 @@ class sfFormtasticConfigHandler extends sfYamlConfigHandler
         {
           // use sfValidatorAnd
           $this->data[] = sprintf('      %s => new sfValidatorAnd(array(', $this->varExport($name));
-          foreach ($validators as $validator)
+          foreach ($validators as $validator => $params)
           {
-            $this->data[] = '        '.$this->buildValidator($validator).',';
+            $this->data[] = '        '.$this->buildValidator($validator, $params).',';
           }
           
           $options = array();
@@ -238,7 +384,9 @@ class sfFormtasticConfigHandler extends sfYamlConfigHandler
         }
         else
         {
-          $this->data[] = sprintf('      %s => %s,', $this->varExport($name), $this->buildValidator($validators[0], $requiredMessage));
+          $validator = key($validators);
+          
+          $this->data[] = sprintf('      %s => %s,', $this->varExport($name), $this->buildValidator($validator, $validators[$validator], $requiredMessage));
         }
       }
       $this->data[] = '    ));';
@@ -249,14 +397,15 @@ class sfFormtasticConfigHandler extends sfYamlConfigHandler
   /**
    * Build a validator instantiation.
    * 
+   * @param   string  $validator
    * @param   array   $params
    * @param   string  $requiredMessage
    * 
    * @return  string
    */
-  protected function buildValidator($params, $requiredMessage = null)
+  protected function buildValidator($validator, $params, $requiredMessage = null)
   {
-    list($validator, $options, $messages) = $params;
+    list($options, $messages) = $params;
     
     if ($requiredMessage)
     {
@@ -282,6 +431,25 @@ class sfFormtasticConfigHandler extends sfYamlConfigHandler
    */
   protected function addLabels()
   {
+    $labels = array();
+    foreach ($this->config['fields'] as $name => $config)
+    {
+      if (isset($config['label']))
+      {
+        $labels[$name] = $config['label'];
+      }
+    }
+    
+    if (count($labels))
+    {
+      $this->data[] = '    $this->widgetSchema->setLabels(array(';
+      foreach ($labels as $name => $label)
+      {
+        $this->data[] = sprintf('      %s => %s,', $this->varExport($name), $this->varExport($label));
+      }
+      $this->data[] = '    ));';
+      $this->data[] = '';
+    }
   }
   
   /**
@@ -289,10 +457,29 @@ class sfFormtasticConfigHandler extends sfYamlConfigHandler
    */
   protected function addHelps()
   {
+    $helps = array();
+    foreach ($this->config['fields'] as $name => $config)
+    {
+      if (isset($config['help']))
+      {
+        $helps[$name] = $config['help'];
+      }
+    }
+    
+    if (count($helps))
+    {
+      $this->data[] = '    $this->widgetSchema->setHelps(array(';
+      foreach ($helps as $name => $help)
+      {
+        $this->data[] = sprintf('      %s => %s,', $this->varExport($name), $this->varExport($help));
+      }
+      $this->data[] = '    ));';
+      $this->data[] = '';
+    }
   }
   
   /**
-   * Export and clean up whitespace.
+   * Export and clean up.
    * 
    * @param   mixed $var
    * 
@@ -306,6 +493,10 @@ class sfFormtasticConfigHandler extends sfYamlConfigHandler
     {
       $export = preg_replace('/\s+/', ' ', $export);
       $export = str_replace(array(' ( ', ', )'), array('(', ')'), $export);
+      if (false === strpos('\' => ', $export))
+      {
+        $export = preg_replace('/\d+ => /', '', $export);
+      }
     }
     
     return $export;
