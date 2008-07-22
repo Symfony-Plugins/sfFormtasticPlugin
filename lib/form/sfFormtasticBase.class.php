@@ -173,6 +173,46 @@ class sfFormtasticBase extends sfForm
   }
   
   /**
+   * @see sfWidgetSchema::setNameFormat()
+   */
+  public function setNameFormat($format)
+  {
+    $this->widgetSchema->setNameFormat($format);
+  }
+  
+  /**
+   * @see sfWidgetSchema::setLabels()
+   */
+  public function setLabels($labels)
+  {
+    $this->widgetSchema->setLabels($labels);
+  }
+  
+  /**
+   * @see sfWidgetSchema::setHelps()
+   */
+  public function setHelps($helps)
+  {
+    $this->widgetSchema->setHelps($helps);
+  }
+  
+  /**
+   * @see sfValidatorSchema::setPreValidator()
+   */
+  public function setPreValidator(sfValidatorBase $validator)
+  {
+    $this->validatorSchema->setPreValidator($validator);
+  }
+  
+  /**
+   * @see sfValidatorSchema::setPostValidator()
+   */
+  public function setPostValidator(sfValidatorBase $validator)
+  {
+    $this->validatorSchema->setPostValidator($validator);
+  }
+  
+  /**
    * Make sure the CSRF field is there.
    */
   protected function checkCSRFField()

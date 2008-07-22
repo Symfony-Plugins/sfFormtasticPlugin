@@ -1,2 +1,2 @@
-config/form/*.yml:
+form/*.yml:
   class: sfFormtasticConfigHandler
