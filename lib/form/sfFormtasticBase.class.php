@@ -106,6 +106,7 @@ class sfFormtasticBase extends sfForm
   public function render($attributes = array())
   {
     $this->checkCSRFField();
+    $this->applyIdFormat();
     
     return parent::render($attributes);
   }
@@ -118,6 +119,7 @@ class sfFormtasticBase extends sfForm
   public function renderHiddenFields()
   {
     $this->checkCSRFField();
+    $this->applyIdFormat();
     
     $rendered = array();
     foreach ($this->getFormFieldSchema()->getHiddenFields() as $field)
@@ -126,6 +128,48 @@ class sfFormtasticBase extends sfForm
     }
     
     return join("\n", $rendered);
+  }
+  
+  /**
+   * Set an id format for all fields in this form.
+   * 
+   * @param   string $format
+   */
+  public function setIdFormat($format)
+  {
+    if (false !== $format && false === strpos($format, '%s'))
+    {
+      throw new InvalidArgumentException(sprintf('The id format must contain %%s ("%s" given)', $format));
+    }
+    
+    $this->setOption('id_format', $format);
+  }
+  
+  /**
+   * Get the id format for this form.
+   * 
+   * @return  string
+   */
+  public function getIdFormat()
+  {
+    return $this->getOption('id_format');
+  }
+  
+  /**
+   * Apply id format to the widgets, if configured.
+   */
+  protected function applyIdFormat()
+  {
+    if (!is_null($format = $this->getIdFormat()))
+    {
+      foreach ($this->widgetSchema->getFields() as $widget)
+      {
+        if ($widget instanceof sfWidgetForm)
+        {
+          $widget->setIdFormat($format);
+        }
+      }
+    }
   }
   
   /**
