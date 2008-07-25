@@ -19,11 +19,11 @@ class sfFormtastic extends sfFormtasticBase
     $formFieldSchemaClass = 'sfFormtasticFieldSchema';
   
   /**
-   * Bind to parameters from the symfony request object, based on name format.
+   * Bind parameters from the symfony request object, based on name format.
    * 
    * @throws LogicException If the name format is not recognized
    */
-  public function bindToRequest()
+  public function bindRequestParameters()
   {
     $request = sfContext::getInstance()->getRequest();
     
