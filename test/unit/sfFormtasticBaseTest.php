@@ -4,10 +4,6 @@ include dirname(__FILE__).'/../bootstrap/unit.php';
 
 $t = new lime_test(17, new lime_output_color);
 
-$autoload = sfSimpleAutoload::getInstance();
-$autoload->addDirectory(dirname(__FILE__).'/../../lib');
-$autoload->register();
-
 sfForm::enableCSRFProtection('secretastic');
 
 $form = new sfFormtasticBase;

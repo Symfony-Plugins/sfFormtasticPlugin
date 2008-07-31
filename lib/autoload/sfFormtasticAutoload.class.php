@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * Autoloader for YAML form classes.
+ * 
+ * @package     sfFormtasticPlugin
+ * @subpackage  autoload
+ * @author      Kris Wallsmith
+ * @version     SVN: $Id$
+ */
 class sfFormtasticAutoload
 {
   static protected

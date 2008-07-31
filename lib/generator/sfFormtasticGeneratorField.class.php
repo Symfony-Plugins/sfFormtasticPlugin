@@ -13,30 +13,30 @@ class sfFormtasticGeneratorField extends sfFormtasticGeneratorBase
   static protected
     $widgetAliasMap = array(),
     $defaultWidgetAliasMap = array(
-      'date'      => 'sfWidgetFormDate',
-      'datetime'  => 'sfWidgetFormDateTime',
-      'timestamp' => 'sfWidgetFormDateTime',
-      'input'     => 'sfWidgetFormInput',
-      'checkbox'  => 'sfWidgetFormInputCheckbox',
-      'file'      => 'sfWidgetFormInputFile',
-      'upload'    => 'sfWidgetFormInputFile',
-      'hidden'    => 'sfWidgetFormInputHidden',
-      'password'  => 'sfWidgetFormInputPassword',
-      'select'    => 'sfWidgetFormSelect',
-      'dropdown'  => 'sfWidgetFormSelect',
-      'many'      => 'sfWidgetFormSelectMany',
-      'radio'     => 'sfWidgetFormSelectRadio',
-      'textarea'  => 'sfWidgetFormTextarea',
-      'time'      => 'sfWidgetFormTime',
+      'date'      => 'sfWidgetasticFormDate',
+      'datetime'  => 'sfWidgetasticFormDateTime',
+      'timestamp' => 'sfWidgetasticFormDateTime',
+      'input'     => 'sfWidgetasticFormInput',
+      'checkbox'  => 'sfWidgetasticFormInputCheckbox',
+      'file'      => 'sfWidgetasticFormInputFile',
+      'upload'    => 'sfWidgetasticFormInputFile',
+      'hidden'    => 'sfWidgetasticFormInputHidden',
+      'password'  => 'sfWidgetasticFormInputPassword',
+      'select'    => 'sfWidgetasticFormSelect',
+      'dropdown'  => 'sfWidgetasticFormSelect',
+      'many'      => 'sfWidgetasticFormSelectMany',
+      'radio'     => 'sfWidgetasticFormSelectRadio',
+      'textarea'  => 'sfWidgetasticFormTextarea',
+      'time'      => 'sfWidgetasticFormTime',
     ),
     $sisterValidatorMap = array(
-      'sfWidgetFormDate'        => 'sfValidatorDate',
-      'sfWidgetFormDateTime'    => 'sfValidatorDateTime',
-      'sfWidgetFormInputFile'   => 'sfValidatorFile',
-      'sfWidgetFormSelect'      => 'sfValidatorChoice',
-      'sfWidgetFormSelectMany'  => 'sfValidatorChoiceMany',
-      'sfWidgetFormSelectRadio' => 'sfValidatorChoice',
-      'sfWidgetFormTime'        => 'sfValidatorTime',
+      'sfWidgetasticFormDate'        => 'sfValidatornatorDate',
+      'sfWidgetasticFormDateTime'    => 'sfValidatornatorDateTime',
+      'sfWidgetasticFormInputFile'   => 'sfValidatornatorFile',
+      'sfWidgetasticFormSelect'      => 'sfValidatornatorChoice',
+      'sfWidgetasticFormSelectMany'  => 'sfValidatornatorChoiceMany',
+      'sfWidgetasticFormSelectRadio' => 'sfValidatornatorChoice',
+      'sfWidgetasticFormTime'        => 'sfValidatornatorTime',
     );
   
   protected
@@ -105,8 +105,8 @@ class sfFormtasticGeneratorField extends sfFormtasticGeneratorBase
       {
         $this->requiredMessage = $config['required']['msg'];
       }
-      unset($config['required']);
     }
+    unset($config['required']);
     
     // add configured validators
     $baseRc = new ReflectionClass('sfValidatorBase');
@@ -396,9 +396,22 @@ class sfFormtasticGeneratorField extends sfFormtasticGeneratorBase
       $validator = self::$sisterValidatorMap[$this->widgetClass];
       $params = array();
       
+      // some widget options need to be copied to the validator
       if (false !== strpos($this->widgetClass, 'Select') && isset($this->widgetOptions['choices']))
       {
         $params['choices'] = $this->widgetOptions['choices'];
+      }
+      elseif (false !== strpos($this->widgetClass, 'Date'))
+      {
+        if (isset($this->widgetOptions['year_from']))
+        {
+          $params['year_from'] = $this->widgetOptions['year_from'];
+        }
+        
+        if (isset($this->widgetOptions['year_to']))
+        {
+          $params['year_to'] = $this->widgetOptions['year_to'];
+        }
       }
       elseif (false !== strpos($this->widgetClass, 'File') && preg_match('/(img|image|pic|avatar)/i', $this->name))
       {

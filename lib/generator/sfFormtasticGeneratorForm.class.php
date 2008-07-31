@@ -11,12 +11,13 @@
 class sfFormtasticGeneratorForm extends sfFormtasticGeneratorBase
 {
   protected
-    $class          = null,
-    $extendsClass   = 'sfForm',
-    $nameFormat     = null,
-    $preValidators  = array(),
-    $postValidators = array(),
-    $fields         = array();
+    $class              = null,
+    $extendsClass       = 'sfFormtastic',
+    $nameFormat         = null,
+    $preValidators      = array(),
+    $postValidators     = array(),
+    $fields             = array(),
+    $maxFieldNameLength = 0;
   
   /**
    * Constructor.
@@ -65,6 +66,11 @@ class sfFormtasticGeneratorForm extends sfFormtasticGeneratorBase
       }
       
       $this->fields[] = $field;
+      
+      if (strlen($name) > $this->maxFieldNameLength)
+      {
+        $this->maxFieldNameLength = strlen($name);
+      }
     }
   }
   
@@ -93,7 +99,7 @@ class sfFormtasticGeneratorForm extends sfFormtasticGeneratorBase
     $data[] = '  public function configure()';
     $data[] = '  {';
     
-    if ('sfForm' != $this->extendsClass)
+    if ($this->extendsCustomClass())
     {
       $data[] = '    parent::configure();';
       $data[] = '';
@@ -140,15 +146,26 @@ class sfFormtasticGeneratorForm extends sfFormtasticGeneratorBase
     $widgets = array();
     foreach ($this->fields as $field)
     {
-      $widgets[] = sprintf('      %s => %s,', $this->varExport($field->getName()), $field->generateWidgetInstantiation());
+      $widgets[] = sprintf(
+        $this->extendsCustomClass() ? '    $this->widgetSchema[%s]%s = %s;' : '      %s%s => %s,', 
+        $this->varExport($field->getName()), 
+        str_repeat(' ', $this->maxFieldNameLength - strlen($field->getName())),
+        $field->generateWidgetInstantiation());
     }
     
     $data = array();
     if ($widgets)
     {
-      $data[] = '    $this->setWidgets(array(';
-      $data[] = join("\n", $widgets);
-      $data[] = '    ));';
+      if ($this->extendsCustomClass())
+      {
+        $data[] = join("\n", $widgets);
+      }
+      else
+      {
+        $data[] = '    $this->setWidgets(array(';
+        $data[] = join("\n", $widgets);
+        $data[] = '    ));';
+      }
       $data[] = '';
     }
     
@@ -165,15 +182,26 @@ class sfFormtasticGeneratorForm extends sfFormtasticGeneratorBase
     $validators = array();
     foreach ($this->fields as $field)
     {
-      $validators[] = sprintf('      %s => %s,', $this->varExport($field->getName()), $field->generateValidatorInstantiation());
+      $validators[] = sprintf(
+        $this->extendsCustomClass() ? '    $this->validatorSchema[%s]%s = %s;' : '      %s%s => %s,',
+        $this->varExport($field->getName()),
+        str_repeat(' ', $this->maxFieldNameLength - strlen($field->getName())),
+        $field->generateValidatorInstantiation());
     }
     
     $data = array();
     if ($validators)
     {
-      $data[] = '    $this->setValidators(array(';
-      $data[] = join("\n", $validators);
-      $data[] = '    ));';
+      if ($this->extendsCustomClass())
+      {
+        $data[] = join("\n", $validators);
+      }
+      else
+      {
+        $data[] = '    $this->setValidators(array(';
+        $data[] = join("\n", $validators);
+        $data[] = '    ));';
+      }
       $data[] = '';
     }
     
@@ -192,16 +220,26 @@ class sfFormtasticGeneratorForm extends sfFormtasticGeneratorBase
     {
       if ($field->hasLabel())
       {
-        $labels[] = sprintf('      %s => %s,', $this->varExport($field->getName()), $this->varExport($field->getLabel()));
+        $labels[] = sprintf(
+          $this->extendsCustomClass() ? '    $this->widgetSchema->setLabel(%s, %s);' : '      %s => %s,',
+          $this->varExport($field->getName()),
+          $this->varExport($field->getLabel()));
       }
     }
     
     $data = array();
     if ($labels)
     {
-      $data[] = '    $this->widgetSchema->setLabels(array(';
-      $data[] = join("\n", $labels);
-      $data[] = '    ));';
+      if ($this->extendsCustomClass())
+      {
+        $data[] = join("\n", $labels);
+      }
+      else
+      {
+        $data[] = '    $this->widgetSchema->setLabels(array(';
+        $data[] = join("\n", $labels);
+        $data[] = '    ));';
+      }
       $data[] = '';
     }
     
@@ -220,16 +258,26 @@ class sfFormtasticGeneratorForm extends sfFormtasticGeneratorBase
     {
       if ($field->hasHelp())
       {
-        $helps[] = sprintf('      %s => %s,', $this->varExport($field->getName()), $this->varExport($field->getHelp()));
+        $helps[] = sprintf(
+          $this->extendsCustomClass() ? '    $this->widgetSchema->setHelp(%s, %s);' : '      %s => %s,',
+          $this->varExport($field->getName()),
+          $this->varExport($field->getHelp()));
       }
     }
     
     $data = array();
     if ($helps)
     {
-      $data[] = '    $this->widgetSchema->setHelps(array(';
-      $data[] = join("\n", $helps);
-      $data[] = '    ));';
+      if ($this->extendsCustomClass())
+      {
+        $data[] = join("\n", $helps);
+      }
+      else
+      {
+        $data[] = '    $this->widgetSchema->setHelps(array(';
+        $data[] = join("\n", $helps);
+        $data[] = '    ));';
+      }
       $data[] = '';
     }
     
@@ -332,5 +380,15 @@ class sfFormtasticGeneratorForm extends sfFormtasticGeneratorBase
     {
       throw new InvalidArgumentException(sprintf('The class "%s" could not be found', $class));
     }
+  }
+  
+  /**
+   * Returns true if this form extends a class other than sfForm.
+   * 
+   * @return  boolean
+   */
+  protected function extendsCustomClass()
+  {
+    return 'sfFormtastic' != $this->extendsClass;
   }
 }

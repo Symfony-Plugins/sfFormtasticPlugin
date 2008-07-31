@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Config handler for sfFormtasticYaml.
+ * Config handler for YAML form classes.
  * 
  * @package     sfFormtasticPlugin
  * @subpackage  config

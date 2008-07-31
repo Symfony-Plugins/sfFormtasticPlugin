@@ -4,10 +4,6 @@ include dirname(__FILE__).'/../bootstrap/unit.php';
 
 $t = new lime_test(5, new lime_output_color);
 
-$autoload = sfSimpleAutoload::getInstance();
-$autoload->addDirectory(dirname(__FILE__).'/../../lib');
-$autoload->register();
-
 $widgetSchema = new sfWidgetasticFormSchemaBase;
 
 $t->ok(!$widgetSchema->has('name'), '->has() returns false if no widget is set');

@@ -19,10 +19,9 @@ myExampleForm:
       sfValidatorEmail:     ~
     birthday:
       type:                 date
-      years:                [1980, 1981]
-      sfValidatorDate:
-        min:                <?php echo strtotime('-18 years')."\n" ?>
-        min_error:          You must be at least 18 years old.
+      year_from:            -18 years
+    some_time:
+      type:                 time
     gender:
       type:                 radio
       choices:              { male: Male, female, Female }

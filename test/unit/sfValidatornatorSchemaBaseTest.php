@@ -4,10 +4,6 @@ include dirname(__FILE__).'/../bootstrap/unit.php';
 
 $t = new lime_test(5, new lime_output_color);
 
-$autoload = sfSimpleAutoload::getInstance();
-$autoload->addDirectory(dirname(__FILE__).'/../../lib');
-$autoload->register();
-
 $validatorSchema = new sfValidatornatorSchemaBase;
 
 $t->ok(!$validatorSchema->has('name'), '->has() returns false if no validator is set');
