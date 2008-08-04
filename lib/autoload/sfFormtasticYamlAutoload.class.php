@@ -8,7 +8,7 @@
  * @author      Kris Wallsmith
  * @version     SVN: $Id$
  */
-class sfFormtasticAutoload
+class sfFormtasticYamlAutoload
 {
   static protected
     $instance = null;
@@ -37,20 +37,20 @@ class sfFormtasticAutoload
    *
    * @param  string $cacheFile  The file path to save the cache
    *
-   * @return sfFormtasticAutoload   A sfFormtasticAutoload implementation instance.
+   * @return sfFormtasticYamlAutoload   A sfFormtasticYamlAutoload implementation instance.
    */
   static public function getInstance($cacheFile = null)
   {
     if (!isset(self::$instance))
     {
-      self::$instance = new sfFormtasticAutoload($cacheFile);
+      self::$instance = new sfFormtasticYamlAutoload($cacheFile);
     }
     
     return self::$instance;
   }
   
   /**
-   * Register sfFormtasticAutoload in spl autoloader.
+   * Register sfFormtasticYamlAutoload in spl autoloader.
    *
    * @return void
    */
@@ -69,7 +69,7 @@ class sfFormtasticAutoload
   }
   
   /**
-   * Unregister sfFormtasticAutoload from spl autoloader.
+   * Unregister sfFormtasticYamlAutoload from spl autoloader.
    *
    * @return void
    */
@@ -153,7 +153,7 @@ class sfFormtasticAutoload
       sfConfig::get('sf_config_dir'),
       sfConfig::get('sf_app_config_dir'),
     );
-    foreach (ProjectConfiguration::getActive()->getPluginPaths() as $pluginDir)
+    foreach (sfProjectConfiguration::getActive()->getPluginPaths() as $pluginDir)
     {
       if (is_dir($pluginDir.'/config'))
       {

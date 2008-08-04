@@ -1,7 +1,7 @@
 <?php
 
-// register the sfFormtastic autoloader to enable autoloading of YAML forms
-$cacheFile = sfConfig::get('sf_config_cache_dir').'/sfFormtasticAutoloadCache.txt';
+// register sfFormtasticYamlAutoload to enable autoloading of YAML forms
+$cacheFile = sfConfig::get('sf_config_cache_dir').'/sfFormtasticYamlAutoloadCache.txt';
 
-$autoload = sfFormtasticAutoload::getInstance($cacheFile);
+$autoload = sfFormtasticYamlAutoload::getInstance($cacheFile);
 $autoload->register();

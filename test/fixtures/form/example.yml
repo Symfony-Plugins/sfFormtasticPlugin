@@ -1,5 +1,4 @@
 myExampleForm:
-  extends:                  sfGuardUserForm
   name_format:              example[%s]
   fields:
     name:

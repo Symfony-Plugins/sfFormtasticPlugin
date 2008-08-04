@@ -8,7 +8,7 @@
  * @author      Kris Wallsmith <kris [dot] wallsmith [at] gmail [dot] com>
  * @version     SVN: $Id$
  */
-class sfFormtasticConfigHandler extends sfYamlConfigHandler
+class sfFormtasticYamlConfigHandler extends sfYamlConfigHandler
 {
   /**
    * @see sfConfigHandler
