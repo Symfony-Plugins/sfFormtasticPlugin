@@ -15,7 +15,7 @@ class <?php echo $this->form->getClass() ?> extends sfFormtastic
   {
     $this->setWidgets(array(
 <?php foreach ($this->form->getFields() as $field): ?>
-      <?php echo $this->var_export($field->getName()) ?><?php echo $this->form->getPaddingForFieldName($field->getName()) ?> => new <?php echo $field->getWidgetClass() ?>(<?php echo $this->var_export($field->getWidgetOptions()) ?>, <?php echo $this->var_export($field->getWidgetAttributes()) ?>),
+      <?php echo $this->var_export($field->getName()) ?><?php echo $this->form->getPaddingForFieldName($field->getName()) ?> => <?php echo $field->generateWidget() ?>,
 <?php endforeach; ?>
     ));
 
@@ -24,11 +24,11 @@ class <?php echo $this->form->getClass() ?> extends sfFormtastic
 <?php if ($field->countValidators() > 1): ?>
       <?php echo $this->var_export($field->getName()) ?><?php echo $this->form->getPaddingForFieldName($field->getName()) ?> => new sfValidatorAnd(array(
 <?php foreach ($field->getValidators() as $validator): ?>
-        new <?php echo $validator->getClass() ?>(<?php echo $this->var_export($validator->getOptions()) ?>, <?php echo $this->var_export($validator->getMessages()) ?>),
+        <?php echo $validator->generate() ?>,
 <?php endforeach; ?>
       ), <?php echo $field->isRequired() ? 'array(\'required\' => true)' : 'array()'?>, <?php echo $field->isRequired() ? $this->var_export(array('required' => $field->getRequiredMessage())) : 'array()' ?>),
 <?php else: ?>
-      <?php echo $this->var_export($field->getName()) ?><?php echo $this->form->getPaddingForFieldName($field->getName()) ?> => new <?php echo $field->getFirstValidator()->getClass() ?>(<?php echo $this->var_export($field->getFirstValidator()->getOptions()) ?>, <?php echo $this->var_export($field->getFirstValidator()->getMessages()) ?>),
+      <?php echo $this->var_export($field->getName()) ?><?php echo $this->form->getPaddingForFieldName($field->getName()) ?> => <?php echo $field->getFirstValidator()->generate() ?>,
 <?php endif; ?>
 <?php endforeach; ?>
     ));

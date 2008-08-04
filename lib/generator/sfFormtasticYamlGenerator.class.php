@@ -16,6 +16,30 @@
 class sfFormtasticYamlGenerator extends sfGenerator
 {
   /**
+   * Export a variable and cleanup its presentation.
+   * 
+   * @param   mixed $var
+   * 
+   * @return  string
+   */
+  static public function var_export($var)
+  {
+    $export = var_export($var, true);
+    
+    if (0 === strpos($export, 'array ('))
+    {
+      $export = preg_replace('/\s+/', ' ', $export);
+      $export = str_replace(array(' ( ', ', )'), array('(', ')'), $export);
+      if (false === strpos('\' => ', $export))
+      {
+        $export = preg_replace('/\d+ => /', '', $export);
+      }
+    }
+    
+    return $export;
+  }
+  
+  /**
    * Creates an instance of the supplied widget or validator class.
    * 
    * @param   string $class
@@ -53,6 +77,49 @@ class sfFormtasticYamlGenerator extends sfGenerator
   }
   
   /**
+   * Returns code to create an instance of a class.
+   * 
+   * @param   string $class
+   * 
+   * @return  string
+   */
+  static public function generateInstantiation($class)
+  {
+    $params = func_get_args();
+    array_shift($params);
+    $params = array_reverse($params);
+    
+    $nonEmpty = false;
+    $exported = array();
+    
+    foreach ($params as $param)
+    {
+      if (empty($param))
+      {
+        if (!$nonEmpty)
+        {
+          continue;
+        }
+      }
+      else
+      {
+        $nonEmpty = true;
+      }
+      
+      $exported[] = self::var_export($param);
+    }
+    
+    if ($exported)
+    {
+      return 'new '.$class.'('.join(', ', array_reverse($exported)).')';
+    }
+    else
+    {
+      return 'new '.$class;
+    }
+  }
+  
+  /**
    * @see sfGenerator
    */
   public function initialize(sfGeneratorManager $generatorManager)
@@ -87,30 +154,6 @@ EOF;
     }
     
     return $data;
-  }
-  
-  /**
-   * Export a variable and cleanup its presentation.
-   * 
-   * @param   mixed $var
-   * 
-   * @return  string
-   */
-  public function var_export($var)
-  {
-    $export = var_export($var, true);
-    
-    if (0 === strpos($export, 'array ('))
-    {
-      $export = preg_replace('/\s+/', ' ', $export);
-      $export = str_replace(array(' ( ', ', )'), array('(', ')'), $export);
-      if (false === strpos('\' => ', $export))
-      {
-        $export = preg_replace('/\d+ => /', '', $export);
-      }
-    }
-    
-    return $export;
   }
 }
 
@@ -441,6 +484,16 @@ class sfFormtasticYamlField
   }
   
   /**
+   * Returns code to create a widget instance.
+   * 
+   * @return  string
+   */
+  public function generateWidget()
+  {
+    return sfFormtasticYamlGenerator::generateInstantiation($this->widgetClass, $this->widgetOptions, $this->widgetAttributes);
+  }
+  
+  /**
    * Returns this field's name.
    * 
    * @return  string
@@ -731,6 +784,16 @@ class sfFormtasticYamlValidator
         $this->options[$key] = $value;
       }
     }
+  }
+  
+  /**
+   * Returns code to create a validator instance.
+   * 
+   * @return  string
+   */
+  public function generate()
+  {
+    return sfFormtasticYamlGenerator::generateInstantiation($this->class, $this->options, $this->messages);
   }
   
   /**
