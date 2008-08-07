@@ -46,15 +46,18 @@ class sfFormtastic extends sfFormtasticBase
    */
   public function setValidatorSchema(sfValidatorSchema $validatorSchema)
   {
-    $request = sfContext::getInstance()->getRequest();
-    
-    if ($request->isXmlHttpRequest() && 
-        $request->isMethod('post') && 
-        preg_match('/(Konqueror|Safari|KHTML)/', $_SERVER['HTTP_USER_AGENT']))
+    if (sfProjectConfiguration::getActive() instanceof sfApplicationConfiguration)
     {
-      // prototype.js adds an underscore parameter to POST requests for 
-      // certain web browsers
-      $validatorSchema['_'] = new sfValidatorPass;
+      $request = sfContext::getInstance()->getRequest();
+      
+      if ($request->isXmlHttpRequest() && 
+          $request->isMethod('post') && 
+          preg_match('/(Konqueror|Safari|KHTML)/', $_SERVER['HTTP_USER_AGENT']))
+      {
+        // prototype.js adds an underscore parameter to POST requests for 
+        // certain web browsers
+        $validatorSchema['_'] = new sfValidatorPass;
+      }
     }
     
     parent::setValidatorSchema($validatorSchema);
