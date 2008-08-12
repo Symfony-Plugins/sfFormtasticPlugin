@@ -1,2 +1,4 @@
 form/*.yml:
   class: sfFormtasticYamlConfigHandler
+
+<?php require_once dirname(__FILE__).'/../lib/config/sfFormtasticYamlConfigHandler.class.php' ?>
