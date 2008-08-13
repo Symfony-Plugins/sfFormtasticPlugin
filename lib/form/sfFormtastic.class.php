@@ -44,6 +44,22 @@ class sfFormtastic extends sfFormtasticBase
   /**
    * @see sfForm
    */
+  public function bind(array $taintedValues = null, array $taintedFiles = null)
+  {
+    parent::bind($taintedValues, $taintedFiles);
+    
+    if (!$this->isValid())
+    {
+      $dispatcher = sfProjectConfiguration::getActive()->getEventDispatcher();
+      
+      $dispatcher->notify(new sfEvent($this, 'application.log', array('Form validation failed: '.$this->errorSchema->getMessage())));
+      $dispatcher->notify(new sfEvent($this, 'form.validation_failure'));
+    }
+  }
+  
+  /**
+   * @see sfForm
+   */
   public function setValidatorSchema(sfValidatorSchema $validatorSchema)
   {
     if (sfProjectConfiguration::getActive() instanceof sfApplicationConfiguration)
