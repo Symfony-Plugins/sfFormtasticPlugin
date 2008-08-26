@@ -34,12 +34,21 @@ $t->like($form->renderHiddenFields(), '/_csrf_token/', '->renderHiddenFields() r
 
 $t->diag('->setIdFormat()');
 
+try
+{
+  $form->setIdFormat('foo');
+  $t->fail('->setIdFormat() throws an exception when parameter does not include "%s"');
+}
+catch (InvalidArgumentException $e)
+{
+  $t->pass('->setIdFormat() throws an exception when parameter does not include "%s"');
+}
+
 $form->setIdFormat('my_id_format_%s');
-$t->is($form->getOption('id_format'), 'my_id_format_%s', '->setIdFormat() sets the "id_format" option');
+$t->is($form->getWidgetSchema()->getOption('id_format'), 'my_id_format_%s', '->setIdFormat() sets the widgetSchema "id_format" option');
 $t->is($form->getIdFormat(), 'my_id_format_%s', '->getIdFormat() returns the "id_format" option');
 $t->like($form->render(), '/id="my_id_format_/', '->render() respects global id format');
 $t->like($form->renderHiddenFields(), '/id="my_id_format_/', '->renderHiddenFields() respects global id format');
 
 $form->setIdFormat(false);
-$t->like($form->render(), '/id="email"/', '"->setIdFormat(false)" resets id attribute on labeled fields');
-$t->unlike($form->render(), '/id="\w*_csrf_token/', '"->setIdFormat(false)" removes id attribute on non-labeled fields');
+$t->unlike($form->render(), '/id="/', '"->setIdFormat(false)" removes id attribute');

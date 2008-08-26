@@ -13,20 +13,4 @@
  */
 class sfFormtasticFieldSchemaBase extends sfFormFieldSchema
 {
-  /**
-   * @return array All hidden form fields
-   */
-  public function getHiddenFields()
-  {
-    $hiddenFields = array();
-    foreach ($this as $field)
-    {
-      if ($field->isHidden())
-      {
-        $hiddenFields[] = $field;
-      }
-    }
-    
-    return $hiddenFields;
-  }
 }
