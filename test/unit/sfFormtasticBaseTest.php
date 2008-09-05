@@ -20,6 +20,11 @@ $form->setWidgets(array('email' => new sfWidgetFormInput));
 $form->setValidators(array('email' => new sfValidatorEmail));
 $t->like($form->renderHiddenFields(), '/_csrf_token/', '->renderHiddenFields() renders CSRF token after form has been modified');
 
+$form->bind();
+$t->ok(!$form->isValid(), '->isValid() says test form is invalid');
+$t->like($form->renderHiddenFields(), '/^<input/', '->renderHiddenFields() does not render errors');
+
+$form = new sfFormtasticBase;
 $widgetSchema = $form->getWidgetSchema();
 $validatorSchema = $form->getValidatorSchema();
 

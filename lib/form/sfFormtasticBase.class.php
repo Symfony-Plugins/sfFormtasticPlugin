@@ -118,7 +118,14 @@ class sfFormtasticBase extends sfForm
   public function renderHiddenFields()
   {
     $clone = clone $this;
-    foreach ($clone->getFormFieldSchema() as $name => $field)
+    
+    if ($this->isBound())
+    {
+      $errorSchemaClass = get_class($this->errorSchema);
+      $clone->setErrorSchema(new $errorSchemaClass($this->validatorSchema));
+    }
+    
+    foreach ($this->getFormFieldSchema() as $name => $field)
     {
       if (!$field->isHidden())
       {
@@ -127,6 +134,16 @@ class sfFormtasticBase extends sfForm
     }
     
     return $clone->render();
+  }
+  
+  /**
+   * Set the error schema for this form.
+   * 
+   * @param   sfValidatorErrorSchema $errorSchema
+   */
+  public function setErrorSchema(sfValidatorErrorSchema $errorSchema)
+  {
+    $this->errorSchema = $errorSchema;
   }
   
   /**
@@ -153,6 +170,8 @@ class sfFormtasticBase extends sfForm
   {
     return $this->widgetSchema->getOption('id_format');
   }
+  
+  
   
   /**
    * Add a field.
