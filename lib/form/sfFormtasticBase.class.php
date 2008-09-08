@@ -103,6 +103,17 @@ class sfFormtasticBase extends sfForm
   /**
    * @see sfForm
    */
+  public function bind(array $taintedValues = null, array $taintedFiles = null)
+  {
+    parent::bind($taintedValues, $taintedFiles);
+    
+    // replace sfValidatorErrorSchema
+    $this->errorSchema = new sfValidatornatorErrorSchema($this->validatorSchema, $this->errorSchema);
+  }
+  
+  /**
+   * @see sfForm
+   */
   public function render($attributes = array())
   {
     $this->checkCSRFField();

@@ -2,7 +2,7 @@
 
 include dirname(__FILE__).'/../bootstrap/unit.php';
 
-$t = new lime_test(19, new lime_output_color);
+$t = new lime_test(21, new lime_output_color);
 
 sfForm::enableCSRFProtection('secretastic');
 
@@ -57,3 +57,8 @@ $t->like($form->renderHiddenFields(), '/id="my_id_format_/', '->renderHiddenFiel
 
 $form->setIdFormat(false);
 $t->unlike($form->render(), '/id="/', '"->setIdFormat(false)" removes id attribute');
+
+$t->diag('->bind()');
+$form->bind(array('name' => 'xyztastic'));
+$t->isa_ok($form->getErrorSchema(), 'sfValidatornatorErrorSchema', '->bind() copies native error schema');
+$t->is(count($form->getErrorSchema()), 1, '->bind() copies the correct number of errors');

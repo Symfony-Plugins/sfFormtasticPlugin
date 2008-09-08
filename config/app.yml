@@ -1,0 +1,3 @@
+# all:
+#   sf_formtastic_plugin:
+#     json_encode_callable: json_encode
