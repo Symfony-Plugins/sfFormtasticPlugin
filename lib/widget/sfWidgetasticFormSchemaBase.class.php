@@ -19,13 +19,13 @@ class sfWidgetasticFormSchemaBase extends sfWidgetFormSchema
   public function __construct($fields = null, $options = array(), $attributes = array(), $labels = array(), $helps = array())
   {
     parent::__construct($fields, $options, $attributes, $labels, $helps);
-    
+
     $this->addFormFormatter('table', new sfWidgetasticFormSchemaFormatterTable($this));
     $this->addFormFormatter('list', new sfWidgetasticFormSchemaFormatterList($this));
     $this->addFormFormatter('dl', new sfWidgetasticFormSchemaFormatterDefinitionList($this));
     $this->addFormFormatter('none', new sfWidgetasticFormSchemaFormatterNone($this));
   }
-  
+
   /**
    * @see sfWidgetFormSchema::offsetExists()
    */
@@ -33,7 +33,7 @@ class sfWidgetasticFormSchemaBase extends sfWidgetFormSchema
   {
     return isset($this[$name]);
   }
-  
+
   /**
    * @see sfWidgetFormSchema::offsetGet()
    */
@@ -41,7 +41,7 @@ class sfWidgetasticFormSchemaBase extends sfWidgetFormSchema
   {
     return $this[$name];
   }
-  
+
   /**
    * @see sfWidgetFormSchema::offsetSet()
    */
@@ -49,7 +49,7 @@ class sfWidgetasticFormSchemaBase extends sfWidgetFormSchema
   {
     $this[$name] = $widget;
   }
-  
+
   /**
    * @see sfWidgetFormSchema::offsetUnset()
    */

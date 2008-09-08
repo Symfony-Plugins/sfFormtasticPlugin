@@ -24,11 +24,11 @@ class sfValidatornatorDate extends sfValidatorDate
   protected function configure($options = array(), $messages = array())
   {
     parent::configure($options, $messages);
-    
+
     $this->addOption('year_from');
     $this->addOption('year_to');
   }
-  
+
   /**
    * @see sfValidatorDate
    */
@@ -42,7 +42,7 @@ class sfValidatornatorDate extends sfValidatorDate
     {
       $this->setOption('max', sprintf('%d-12-31', ctype_digit($yearTo) ? $yearTo : date('Y', strtotime($yearTo))));
     }
-    
+
     return parent::doClean($value);
   }
 }

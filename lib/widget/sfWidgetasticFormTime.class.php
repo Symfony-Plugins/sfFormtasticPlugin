@@ -28,27 +28,27 @@ class sfWidgetasticFormTime extends sfWidgetFormTime
   protected function configure($options = array(), $attributes = array())
   {
     parent::configure($options, $attributes);
-    
+
     // rename parent options
     $this->addOption('format_without_ampm', $this->getOption('format'));
     $this->addOption('format_without_seconds_or_ampm', $this->getOption('format_without_seconds'));
-    
+
     // new defaults for parent options
     $this->setOption('format', '%hour%:%minute%:%second% %ampm%');
     $this->setOption('format_without_seconds', '%hour%:%minute% %ampm%');
-    
+
     $this->addOption('hours_interval', 1);
     $this->addOption('minutes_interval', 1);
     $this->addOption('seconds_interval', 1);
-    
+
     $this->addOption('24_hour_clock', false);
-    
+
     // new default empty values
     $emptyValues = $this->getOption('empty_values');
     $emptyValues['ampm'] = null;
     $this->setOption('empty_values', $emptyValues);
   }
-  
+
   /**
    * @see sfWidgetFormTime
    */
@@ -65,7 +65,7 @@ class sfWidgetasticFormTime extends sfWidgetFormTime
       $lowHour  = 1;
       $highHour = 12;
     }
-    
+
     // hours_interval
     $hours = array();
     foreach (range($lowHour, $highHour, $this->getOption('hours_interval')) as $hour)
@@ -74,7 +74,7 @@ class sfWidgetasticFormTime extends sfWidgetFormTime
       $hours[$formattedHour] = $formattedHour;
     }
     $this->setOption('hours', $hours);
-    
+
     // minutes_interval
     $minutes = array();
     foreach (range(0, 59, $this->getOption('minutes_interval')) as $minute)
@@ -83,7 +83,7 @@ class sfWidgetasticFormTime extends sfWidgetFormTime
       $minutes[$twoChar] = $twoChar;
     }
     $this->setOption('minutes', $minutes);
-    
+
     // seconds_interval
     $seconds = array();
     foreach (range(0, 59, $this->getOption('seconds_interval')) as $second)
@@ -92,7 +92,7 @@ class sfWidgetasticFormTime extends sfWidgetFormTime
       $seconds[$twoChar] = $twoChar;
     }
     $this->setOption('seconds', $seconds);
-    
+
     // ampm
     if (!$this->getOption('24_hour_clock'))
     {
@@ -101,10 +101,10 @@ class sfWidgetasticFormTime extends sfWidgetFormTime
         strftime('%p', strtotime('2000-01-01 18:00:00')),
       );
       $choices = array_combine($choices, $choices);
-      
+
       $default = array('ampm' => null);
       $emptyValues = $this->getOption('empty_values');
-      
+
       if (is_array($value))
       {
         $value = array_merge($default, $value);
@@ -121,7 +121,7 @@ class sfWidgetasticFormTime extends sfWidgetFormTime
           $value = array('ampm' => strftime('%p', $value));
         }
       }
-      
+
       $widget = new sfWidgetFormSelect(array('choices' => $this->getOption('can_be_empty') ? array('' => $emptyValues['ampm']) + $choices : $choices), array_merge($this->attributes, $attributes));
       $renderedAmPm = $widget->render($name.'[ampm]', $value['ampm']);
     }
@@ -131,17 +131,17 @@ class sfWidgetasticFormTime extends sfWidgetFormTime
       $this->setOption('format', $this->getOption('format_without_ampm'));
       $this->setOption('format_without_seconds', $this->getOption('format_without_seconds_or_ampm'));
     }
-    
+
     $retval = parent::render($name, $value, $attributes, $errors);
-    
+
     if (isset($renderedAmPm))
     {
       $retval = strtr($retval, array('%ampm%' => $renderedAmPm));
     }
-    
+
     return $retval;
   }
-  
+
   /**
    * Get an option value to be used with {@link strftime()}.
    * 
@@ -152,12 +152,12 @@ class sfWidgetasticFormTime extends sfWidgetFormTime
   protected function getFormatOption($name)
   {
     $value = $this->getOption($name);
-    
+
     if ($value && '%' != $value{0})
     {
       $value = '%'.$value;
     }
-    
+
     return $value;
   }
 }

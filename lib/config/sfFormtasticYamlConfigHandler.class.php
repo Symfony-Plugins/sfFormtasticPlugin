@@ -18,7 +18,7 @@ class sfFormtasticYamlConfigHandler extends sfYamlConfigHandler
     $generatorManager = new sfGeneratorManager(sfProjectConfiguration::getActive());
     return $generatorManager->generate('sfFormtasticYamlGenerator', $this->getConfiguration($configFiles));
   }
-  
+
   /**
    * @see sfConfigHandler
    */

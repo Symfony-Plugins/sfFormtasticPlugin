@@ -22,10 +22,10 @@ class sfValidatornatorSchemaArray extends sfValidatorSchema
   public function __construct(sfValidatorBase $validator, $options = array(), $messages = array())
   {
     $this->addOption('validator', $validator);
-    
+
     parent::__construct(null, $options, $messages);
   }
-  
+
   /**
    * @see sfValidatorBase
    */
@@ -35,22 +35,22 @@ class sfValidatornatorSchemaArray extends sfValidatorSchema
     {
       $values = array();
     }
-    
+
     if (!is_array($values))
     {
       throw new InvalidArgumentException('You must pass an array parameter to the clean() method');
     }
-    
+
     $clean = array();
-    
+
     foreach ($values as $i => $value)
     {
       $validator = $this->getOption('validator');
       $validator = clone $validator;
-      
+
       $clean[$i] = $validator->clean($value);
     }
-    
+
     return $clean;
   }
 }

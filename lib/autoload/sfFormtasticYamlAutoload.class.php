@@ -12,13 +12,13 @@ class sfFormtasticYamlAutoload
 {
   static protected
     $instance = null;
-  
+
   protected
     $cacheFile    = null,
     $cacheLoaded  = false,
     $cacheChanged = false,
     $classes      = null;
-  
+
   /**
    * Constructor.
    */
@@ -28,10 +28,10 @@ class sfFormtasticYamlAutoload
     {
       $this->cacheFile = $cacheFile;
     }
-    
+
     $this->loadCache();
   }
-  
+
   /**
    * Retrieves the singleton instance of this class.
    *
@@ -45,10 +45,10 @@ class sfFormtasticYamlAutoload
     {
       self::$instance = new sfFormtasticYamlAutoload($cacheFile);
     }
-    
+
     return self::$instance;
   }
-  
+
   /**
    * Register sfFormtasticYamlAutoload in spl autoloader.
    *
@@ -61,13 +61,13 @@ class sfFormtasticYamlAutoload
     {
       throw new sfException(sprintf('Unable to register %s::autoload as an autoloading method.', get_class(self::getInstance())));
     }
-    
+
     if (self::getInstance()->cacheFile)
     {
       register_shutdown_function(array(self::getInstance(), 'saveCache'));
     }
   }
-  
+
   /**
    * Unregister sfFormtasticYamlAutoload from spl autoloader.
    *
@@ -77,7 +77,7 @@ class sfFormtasticYamlAutoload
   {
     spl_autoload_unregister(array(self::getInstance(), 'autoload'));
   }
-  
+
   /**
    * Handles autoloading of classes.
    *
@@ -92,24 +92,24 @@ class sfFormtasticYamlAutoload
     {
       return true;
     }
-    
+
     // load class array if necessary
     if (is_null($this->classes))
     {
       $this->reload();
     }
-    
+
     // we have a YAML for this class, include it
     if (isset($this->classes[$class]))
     {
       require sfContext::getInstance()->getConfigCache()->checkConfig($this->classes[$class]);
-      
+
       return true;
     }
-    
+
     return false;
   }
-  
+
   /**
    * Loads the cache.
    */
@@ -119,13 +119,13 @@ class sfFormtasticYamlAutoload
     {
       return;
     }
-    
+
     $this->classes = unserialize(file_get_contents($this->cacheFile));
-    
+
     $this->cacheLoaded = true;
     $this->cacheChanged = false;
   }
-  
+
   /**
    * Saves the cache.
    */
@@ -134,11 +134,11 @@ class sfFormtasticYamlAutoload
     if ($this->cacheChanged)
     {
       file_put_contents($this->cacheFile, serialize($this->classes));
-      
+
       $this->cacheChanged = false;
     }
   }
-  
+
   /**
    * Reloads cache.
    * 
@@ -148,7 +148,7 @@ class sfFormtasticYamlAutoload
   {
     $this->classes = array();
     $this->cacheLoaded = false;
-    
+
     $in = array(
       sfConfig::get('sf_config_dir'),
       sfConfig::get('sf_app_config_dir'),
@@ -160,13 +160,13 @@ class sfFormtasticYamlAutoload
         $in[] = $pluginDir.'/config';
       }
     }
-    
+
     // find all config/form directories
     $dirs = sfFinder::type('dir')->name('form')->in($in);
-    
+
     // find all *.yml form files
     $files = sfFinder::type('file')->name('*.yml')->in($dirs);
-    
+
     foreach ($files as $file)
     {
       // mine class names
@@ -178,11 +178,11 @@ class sfFormtasticYamlAutoload
         }
       }
     }
-    
+
     $this->cacheLoaded = true;
     $this->cacheChanged = true;
   }
-  
+
   /**
    * Removes the cache.
    */

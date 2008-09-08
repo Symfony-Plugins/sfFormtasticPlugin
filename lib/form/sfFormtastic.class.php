@@ -17,7 +17,7 @@ class sfFormtastic extends sfFormtasticBase
     $widgetSchemaClass    = 'sfWidgetasticFormSchema',
     $errorSchemaClass     = 'sfValidatornatorErrorSchema',
     $formFieldSchemaClass = 'sfFormtasticFieldSchema';
-  
+
   /**
    * Bind parameters from the symfony request object, based on name format.
    * 
@@ -26,7 +26,7 @@ class sfFormtastic extends sfFormtasticBase
   public function bindRequestParameters()
   {
     $request = sfContext::getInstance()->getRequest();
-    
+
     if ('%s' == $nameFormat = $this->widgetSchema->getNameFormat())
     {
       $this->bind($request->isMethod('post') ? $request->getPostParameters() : $request->getGetParameters(), $request->getFiles());
@@ -40,23 +40,23 @@ class sfFormtastic extends sfFormtasticBase
       throw new LogicException(sprintf('%s cannot understand the name format "%s"', __METHOD__, $nameFormat));
     }
   }
-  
+
   /**
    * @see sfForm
    */
   public function bind(array $taintedValues = null, array $taintedFiles = null)
   {
     parent::bind($taintedValues, $taintedFiles);
-    
+
     if (!$this->isValid())
     {
       $dispatcher = sfProjectConfiguration::getActive()->getEventDispatcher();
-      
+
       $dispatcher->notify(new sfEvent($this, 'application.log', array('Form validation failed: '.$this->errorSchema->getMessage())));
       $dispatcher->notify(new sfEvent($this, 'form.validation_failure'));
     }
   }
-  
+
   /**
    * @see sfForm
    */
@@ -65,7 +65,7 @@ class sfFormtastic extends sfFormtasticBase
     if (sfProjectConfiguration::getActive() instanceof sfApplicationConfiguration)
     {
       $request = sfContext::getInstance()->getRequest();
-      
+
       if ($request->isXmlHttpRequest() && 
           $request->isMethod('post') && 
           preg_match('/(Konqueror|Safari|KHTML)/', $_SERVER['HTTP_USER_AGENT']))
@@ -75,7 +75,7 @@ class sfFormtastic extends sfFormtasticBase
         $validatorSchema['_'] = new sfValidatorPass;
       }
     }
-    
+
     parent::setValidatorSchema($validatorSchema);
   }
 }

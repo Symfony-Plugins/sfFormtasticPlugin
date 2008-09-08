@@ -15,16 +15,16 @@ class sfFormtasticBase extends sfForm
 {
   static protected
     $defaultValidator = null;
-  
+
   protected
     $localCSRFProtection  = null,
     $localCSRFSecret      = null,
-    
+
     $validatorSchemaClass = 'sfValidatornatorSchemaBase',
     $widgetSchemaClass    = 'sfWidgetasticFormSchemaBase',
     $errorSchemaClass     = 'sfValidatornatorErrorSchemaBase',
     $formFieldSchemaClass = 'sfFormtasticFieldSchemaBase';
-  
+
   /**
    * Set the default validator used by ->addField().
    * 
@@ -34,7 +34,7 @@ class sfFormtasticBase extends sfForm
   {
     self::$defaultValidator = $validator;
   }
-  
+
   /**
    * Get the default validator used by ->addField().
    * 
@@ -46,10 +46,10 @@ class sfFormtasticBase extends sfForm
     {
       self::$defaultValidator = new sfValidatorPass;
     }
-    
+
     return self::$defaultValidator;
   }
-  
+
   /**
    * @see sfForm
    */
@@ -57,26 +57,26 @@ class sfFormtasticBase extends sfForm
   {
     $this->setDefaults($defaults);
     $this->options = $options;
-    
+
     $validatorSchemaClass = $this->validatorSchemaClass;
     $widgetSchemaClass    = $this->widgetSchemaClass;
     $errorSchemaClass     = $this->errorSchemaClass;
-    
+
     $this->validatorSchema = new $validatorSchemaClass;
     $this->widgetSchema    = new $widgetSchemaClass;
     $this->errorSchema     = new $errorSchemaClass($this->validatorSchema);
-    
+
     $this->setup();
     $this->configure();
-    
+
     $this->addCSRFProtection($CSRFSecret);
     $this->resetFormFields();
-    
+
     // store local CSRF flag and secret
     $this->localCSRFSecret = $CSRFSecret;
     $this->localCSRFProtection = $this->isCSRFProtected();
   }
-  
+
   /**
    * @see sfForm
    */
@@ -85,7 +85,7 @@ class sfFormtasticBase extends sfForm
     $widgetSchemaClass = $this->widgetSchemaClass;
     $this->setWidgetSchema(new $widgetSchemaClass($widgets));
   }
-  
+
   /**
    * @see sfForm
    */
@@ -96,31 +96,31 @@ class sfFormtasticBase extends sfForm
       $formFieldSchemaClass = $this->formFieldSchemaClass;
       $this->formFieldSchema = new $formFieldSchemaClass($this->widgetSchema, null, null, $this->isBound ? $this->taintedValues : $this->defaults, $this->errorSchema);
     }
-    
+
     return $this->formFieldSchema;
   }
-  
+
   /**
    * @see sfForm
    */
   public function bind(array $taintedValues = null, array $taintedFiles = null)
   {
     parent::bind($taintedValues, $taintedFiles);
-    
+
     // replace sfValidatorErrorSchema
     $this->errorSchema = new sfValidatornatorErrorSchema($this->validatorSchema, $this->errorSchema);
   }
-  
+
   /**
    * @see sfForm
    */
   public function render($attributes = array())
   {
     $this->checkCSRFField();
-    
+
     return parent::render($attributes);
   }
-  
+
   /**
    * Render all hidden fields.
    * 
@@ -129,13 +129,13 @@ class sfFormtasticBase extends sfForm
   public function renderHiddenFields()
   {
     $clone = clone $this;
-    
+
     if ($this->isBound())
     {
       $errorSchemaClass = get_class($this->errorSchema);
       $clone->setErrorSchema(new $errorSchemaClass($this->validatorSchema));
     }
-    
+
     foreach ($this->getFormFieldSchema() as $name => $field)
     {
       if (!$field->isHidden())
@@ -143,10 +143,10 @@ class sfFormtasticBase extends sfForm
         unset($clone[$name]);
       }
     }
-    
+
     return $clone->render();
   }
-  
+
   /**
    * Set the error schema for this form.
    * 
@@ -156,7 +156,7 @@ class sfFormtasticBase extends sfForm
   {
     $this->errorSchema = $errorSchema;
   }
-  
+
   /**
    * Set an id format for all fields in this form.
    * 
@@ -168,10 +168,10 @@ class sfFormtasticBase extends sfForm
     {
       throw new InvalidArgumentException(sprintf('The id format must contain %%s ("%s" given)', $format));
     }
-    
+
     $this->widgetSchema->setOption('id_format', $format);
   }
-  
+
   /**
    * Get the id format for this form.
    * 
@@ -181,9 +181,9 @@ class sfFormtasticBase extends sfForm
   {
     return $this->widgetSchema->getOption('id_format');
   }
-  
-  
-  
+
+
+
   /**
    * Add a field.
    * 
@@ -197,13 +197,13 @@ class sfFormtasticBase extends sfForm
     {
       throw new LogicException('Fields cannot be added to a bound form');
     }
-    
+
     $this->widgetSchema[$name] = $widget;
     $this->validatorSchema[$name] = is_null($validator) ? clone $this->getDefaultValidator() : $validator;
-    
+
     $this->resetFormFields();
   }
-  
+
   /**
    * @see sfForm::offsetExists()
    */
@@ -211,7 +211,7 @@ class sfFormtasticBase extends sfForm
   {
     return isset($this[$name]);
   }
-  
+
   /**
    * @see sfForm::offsetGet()
    */
@@ -219,7 +219,7 @@ class sfFormtasticBase extends sfForm
   {
     return $this[$name];
   }
-  
+
   /**
    * @see sfForm::offsetUnset()
    */
@@ -227,7 +227,7 @@ class sfFormtasticBase extends sfForm
   {
     unset($this[$name]);
   }
-  
+
   /**
    * @see sfWidgetSchema::setNameFormat()
    */
@@ -235,7 +235,7 @@ class sfFormtasticBase extends sfForm
   {
     $this->widgetSchema->setNameFormat($format);
   }
-  
+
   /**
    * @see sfWidgetSchema::setLabels()
    */
@@ -243,7 +243,7 @@ class sfFormtasticBase extends sfForm
   {
     $this->widgetSchema->setLabels($labels);
   }
-  
+
   /**
    * @see sfWidgetSchema::setHelps()
    */
@@ -251,7 +251,7 @@ class sfFormtasticBase extends sfForm
   {
     $this->widgetSchema->setHelps($helps);
   }
-  
+
   /**
    * @see sfValidatorSchema::setPreValidator()
    */
@@ -259,7 +259,7 @@ class sfFormtasticBase extends sfForm
   {
     $this->validatorSchema->setPreValidator($validator);
   }
-  
+
   /**
    * @see sfValidatorSchema::setPostValidator()
    */
@@ -267,7 +267,7 @@ class sfFormtasticBase extends sfForm
   {
     $this->validatorSchema->setPostValidator($validator);
   }
-  
+
   /**
    * Make sure the CSRF field is there.
    */

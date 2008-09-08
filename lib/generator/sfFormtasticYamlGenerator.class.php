@@ -25,7 +25,7 @@ class sfFormtasticYamlGenerator extends sfGenerator
   static public function var_export($var)
   {
     $export = var_export($var, true);
-    
+
     if (0 === strpos($export, 'array ('))
     {
       $export = preg_replace('/\s+/', ' ', $export);
@@ -35,10 +35,10 @@ class sfFormtasticYamlGenerator extends sfGenerator
         $export = preg_replace('/\d+ => /', '', $export);
       }
     }
-    
+
     return $export;
   }
-  
+
   /**
    * Creates an instance of the supplied widget or validator class.
    * 
@@ -55,7 +55,7 @@ class sfFormtasticYamlGenerator extends sfGenerator
     {
       throw new InvalidArgumentException('The supplied class "%s" is neither a widget nor validator.', $class);
     }
-    
+
     try
     {
       $object = new $class;
@@ -63,19 +63,19 @@ class sfFormtasticYamlGenerator extends sfGenerator
     catch (RuntimeException $e)
     {
       preg_match_all('/\'(\w+)\'/', $e->getMessage(), $matches);
-      
+
       $options = array();
       foreach ($matches[1] as $match)
       {
         $options[$match] = null;
       }
-      
+
       $object = new $class($options);
     }
-    
+
     return $object;
   }
-  
+
   /**
    * Returns code to create an instance of a class.
    * 
@@ -88,10 +88,10 @@ class sfFormtasticYamlGenerator extends sfGenerator
     $params = func_get_args();
     array_shift($params);
     $params = array_reverse($params);
-    
+
     $nonEmpty = false;
     $exported = array();
-    
+
     foreach ($params as $param)
     {
       if (empty($param))
@@ -105,10 +105,10 @@ class sfFormtasticYamlGenerator extends sfGenerator
       {
         $nonEmpty = true;
       }
-      
+
       $exported[] = self::var_export($param);
     }
-    
+
     if ($exported)
     {
       return 'new '.$class.'('.join(', ', array_reverse($exported)).')';
@@ -118,17 +118,17 @@ class sfFormtasticYamlGenerator extends sfGenerator
       return 'new '.$class;
     }
   }
-  
+
   /**
    * @see sfGenerator
    */
   public function initialize(sfGeneratorManager $generatorManager)
   {
     parent::initialize($generatorManager);
-    
+
     $this->setGeneratorClass('sfFormtasticYaml');
   }
-  
+
   /**
    * @see sfGenerator
    */
@@ -145,14 +145,14 @@ class sfFormtasticYamlGenerator extends sfGenerator
 
 EOF;
     $data = sprintf($data, date('Y/m/d H:i:s'));
-    
+
     foreach ($params as $formClass => $formParams)
     {
       $this->form = new sfFormtasticYamlForm($formClass, $formParams);
-      
+
       $data .= $this->evalTemplate('sfFormtasticYamlTemplate.php');
     }
-    
+
     return $data;
   }
 }
@@ -174,7 +174,7 @@ class sfFormtasticYamlForm
     $preValidators      = array(),
     $postValidators     = array(),
     $maxFieldNameLength = 0;
-  
+
   /**
    * Constructor.
    * 
@@ -185,7 +185,7 @@ class sfFormtasticYamlForm
   {
     $this->initialize($class, $params);
   }
-  
+
   /**
    * Initializes this form.
    * 
@@ -195,28 +195,28 @@ class sfFormtasticYamlForm
   public function initialize($class, $params = array())
   {
     $this->class = $class;
-    
+
     if (isset($params['name_format']))
     {
       $this->nameFormat = $params['name_format'];
     }
-    
+
     foreach ($params['fields'] as $fieldName => $fieldParams)
     {
       $field = new sfFormtasticYamlField($fieldName, $fieldParams);
-      
+
       $this->preValidators  = array_merge($this->preValidators, $field->getPreValidators());
       $this->postValidators = array_merge($this->postValidators, $field->getPostValidators());
-      
+
       $this->fields[] = $field;
-      
+
       if (strlen($fieldName) > $this->maxFieldNameLength)
       {
         $this->maxFieldNameLength = strlen($fieldName);
       }
     }
   }
-  
+
   /**
    * Returns this form's class name.
    * 
@@ -226,7 +226,7 @@ class sfFormtasticYamlForm
   {
     return $this->class;
   }
-  
+
   /**
    * Returns this form's name format.
    * 
@@ -236,7 +236,7 @@ class sfFormtasticYamlForm
   {
     return $this->nameFormat;
   }
-  
+
   /**
    * Returns as array of form field data objects.
    * 
@@ -246,7 +246,7 @@ class sfFormtasticYamlForm
   {
     return $this->fields;
   }
-  
+
   /**
    * Returns this form's pre-validators.
    * 
@@ -256,7 +256,7 @@ class sfFormtasticYamlForm
   {
     return $this->preValidators;
   }
-  
+
   /**
    * Returns this form's post-validators.
    * 
@@ -266,7 +266,7 @@ class sfFormtasticYamlForm
   {
     return $this->postValidators;
   }
-  
+
   /**
    * Returns an array of non-null help values.
    * 
@@ -282,10 +282,10 @@ class sfFormtasticYamlForm
         $helps[$field->getName()] = $help;
       }
     }
-    
+
     return $helps;
   }
-  
+
   /**
    * Returns an array of non-null label values.
    * 
@@ -301,10 +301,10 @@ class sfFormtasticYamlForm
         $labels[$field->getName()] = $label;
       }
     }
-    
+
     return $labels;
   }
-  
+
   /**
    * Returns padding for the supplied field name.
    * 
@@ -336,7 +336,7 @@ class sfFormtasticYamlField
     $required         = false,
     $requiredMessage  = null,
     $validators       = array();
-  
+
   /**
    * Constructor.
    * 
@@ -347,7 +347,7 @@ class sfFormtasticYamlField
   {
     $this->initialize($name, $params);
   }
-  
+
   /**
    * Initializes this form field.
    * 
@@ -357,19 +357,19 @@ class sfFormtasticYamlField
   public function initialize($name, $params = array())
   {
     $this->name = $name;
-    
+
     if (isset($params['label']))
     {
       $this->label = $params['label'];
       unset($params['label']);
     }
-    
+
     if (isset($params['help']))
     {
       $this->help = $params['help'];
       unset($params['help']);
     }
-    
+
     if (isset($params['type']))
     {
       $this->widgetClass = $this->translateTypeToWidgetClass($params['type']);
@@ -379,7 +379,7 @@ class sfFormtasticYamlField
     {
       $this->widgetClass = $widgetClass;
     }
-    
+
     if (isset($params['required']) && $params['required'])
     {
       $this->required = true;
@@ -389,7 +389,7 @@ class sfFormtasticYamlField
       }
     }
     unset($params['required']);
-    
+
     // capture any validator classes
     $baseRc = new ReflectionClass('sfValidatorBase');
     foreach ($params as $validatorClass => $validatorParams)
@@ -404,7 +404,7 @@ class sfFormtasticYamlField
         }
       }
     }
-    
+
     if (count($params))
     {
       $widget = sfFormtasticYamlGenerator::createInstanceOf($this->widgetClass);
@@ -413,7 +413,7 @@ class sfFormtasticYamlField
         try
         {
           $widget->setOption($key, $value);
-          
+
           $this->widgetOptions[$key] = $value;
         }
         catch (InvalidArgumentException $e)
@@ -422,30 +422,30 @@ class sfFormtasticYamlField
         }
       }
     }
-    
+
     // some widget classes have sister validators
     if (isset(self::$sisterValidatorMap[$this->widgetClass]) && !$this->hasValidator(self::$sisterValidatorMap[$this->widgetClass]))
     {
       $validatorClass = self::$sisterValidatorMap[$this->widgetClass];
       $validator = sfFormtasticYamlGenerator::createInstanceOf($validatorClass);
-      
+
       $validatorOptions = array();
       foreach ($this->widgetOptions as $key => $value)
       {
         try
         {
           $validator->setOption($key, $value);
-          
+
           $validatorOptions[$key] = $value;
         }
         catch (InvalidArgumentException $e)
         {
         }
       }
-      
+
       $this->validators[] = new sfFormtasticYamlValidator($validatorClass, $validatorOptions);
     }
-    
+
     // if there are no validators, guess based on field name
     if (!$this->validators)
     {
@@ -457,7 +457,7 @@ class sfFormtasticYamlField
       {
         $this->validators[] = new sfFormtasticYamlValidator('sfValidatorEmail');
       }
-      
+
       // if all else fails, choose based on whether this field is required
       elseif ($this->isRequired())
       {
@@ -468,7 +468,7 @@ class sfFormtasticYamlField
         $this->validators[] = new sfFormtasticYamlValidator('sfValidatorPass');
       }
     }
-    
+
     // apply required option and message
     if (count($this->validators) == 1)
     {
@@ -482,7 +482,7 @@ class sfFormtasticYamlField
       }
     }
   }
-  
+
   /**
    * Returns code to create a widget instance.
    * 
@@ -492,7 +492,7 @@ class sfFormtasticYamlField
   {
     return sfFormtasticYamlGenerator::generateInstantiation($this->widgetClass, $this->widgetOptions, $this->widgetAttributes);
   }
-  
+
   /**
    * Returns this field's name.
    * 
@@ -502,7 +502,7 @@ class sfFormtasticYamlField
   {
     return $this->name;
   }
-  
+
   /**
    * Returns this field's label.
    * 
@@ -512,7 +512,7 @@ class sfFormtasticYamlField
   {
     return $this->label;
   }
-  
+
   /**
    * Returns this field's help message.
    * 
@@ -522,7 +522,7 @@ class sfFormtasticYamlField
   {
     return $this->help;
   }
-  
+
   /**
    * Returns this field's widget class.
    * 
@@ -532,7 +532,7 @@ class sfFormtasticYamlField
   {
     return $this->widgetClass;
   }
-  
+
   /**
    * Returns this field's widget options.
    * 
@@ -542,7 +542,7 @@ class sfFormtasticYamlField
   {
     return $this->widgetOptions;
   }
-  
+
   /**
    * Returns this field's widget attributes.
    * 
@@ -552,7 +552,7 @@ class sfFormtasticYamlField
   {
     return $this->widgetAttributes;
   }
-  
+
   /**
    * Returns this field's first validator.
    * 
@@ -562,7 +562,7 @@ class sfFormtasticYamlField
   {
     return $this->validators[0];
   }
-  
+
   /**
    * Returns true if this field already has the supplied validator.
    * 
@@ -576,7 +576,7 @@ class sfFormtasticYamlField
     {
       $validator = $validator->getClass();
     }
-    
+
     foreach ($this->validators as $assignedValidator)
     {
       if ($validator == $assignedValidator->getClass())
@@ -584,10 +584,10 @@ class sfFormtasticYamlField
         return true;
       }
     }
-    
+
     return false;
   }
-  
+
   /**
    * Returns as array of validator data objects.
    * 
@@ -597,7 +597,7 @@ class sfFormtasticYamlField
   {
     return $this->validators;
   }
-  
+
   /**
    * Returns a count of this field's validators.
    * 
@@ -607,7 +607,7 @@ class sfFormtasticYamlField
   {
     return count($this->validators);
   }
-  
+
   /**
    * Returns as array of pre-validators for this field.
    * 
@@ -617,7 +617,7 @@ class sfFormtasticYamlField
   {
     return array();
   }
-  
+
   /**
    * Returns as array of post-validators for this field.
    * 
@@ -627,7 +627,7 @@ class sfFormtasticYamlField
   {
     return array();
   }
-  
+
   /**
    * Returns true if this is a required field.
    * 
@@ -637,7 +637,7 @@ class sfFormtasticYamlField
   {
     return $this->required;
   }
-  
+
   /**
    * Returns this field's required message.
    * 
@@ -647,7 +647,7 @@ class sfFormtasticYamlField
   {
     return $this->isRequired() ? $this->requiredMessage : null;
   }
-  
+
   /**
    * Translate a shorthand type value to a widget class.
    * 
@@ -673,10 +673,10 @@ class sfFormtasticYamlField
     {
       throw new InvalidArgumentException(sprintf('The class "%s" could not be found', $widgetClass));
     }
-    
+
     return $widgetClass;
   }
-  
+
   /**
    * Translate a field name to widget class.
    * 
@@ -703,7 +703,7 @@ class sfFormtasticYamlField
       return 'sfWidgetasticFormDate';
     }
   }
-  
+
   static protected
     $widgetAliasMap = array(
       'date'      => 'sfWidgetasticFormDate',
@@ -747,7 +747,7 @@ class sfFormtasticYamlValidator
     $class    = null,
     $options  = array(),
     $messages = array();
-  
+
   /**
    * Constructor.
    * 
@@ -758,7 +758,7 @@ class sfFormtasticYamlValidator
   {
     $this->initialize($class, $params);
   }
-  
+
   /**
    * Initializes this validator.
    * 
@@ -768,7 +768,7 @@ class sfFormtasticYamlValidator
   public function initialize($class, $params = array())
   {
     $this->class = $class;
-    
+
     foreach ($params as $key => $value)
     {
       if (in_array($key, array('invalid', 'error')))
@@ -785,7 +785,7 @@ class sfFormtasticYamlValidator
       }
     }
   }
-  
+
   /**
    * Returns code to create a validator instance.
    * 
@@ -795,7 +795,7 @@ class sfFormtasticYamlValidator
   {
     return sfFormtasticYamlGenerator::generateInstantiation($this->class, $this->options, $this->messages);
   }
-  
+
   /**
    * Sets the validator required option and message.
    * 
@@ -818,7 +818,7 @@ class sfFormtasticYamlValidator
       unset($this->messages['required']);
     }
   }
-  
+
   /**
    * Returns this validator's class.
    * 
@@ -828,7 +828,7 @@ class sfFormtasticYamlValidator
   {
     return $this->class;
   }
-  
+
   /**
    * Returns this validator's options.
    * 
@@ -838,7 +838,7 @@ class sfFormtasticYamlValidator
   {
     return $this->options;
   }
-  
+
   /**
    * Returns this validator's messages.
    * 

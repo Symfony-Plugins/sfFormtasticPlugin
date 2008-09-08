@@ -20,7 +20,7 @@ class sfValidatornatorSchemaBase extends sfValidatorSchema
   {
     return isset($this[$name]);
   }
-  
+
   /**
    * @see sfValidatorSchema::offsetGet()
    */
@@ -28,7 +28,7 @@ class sfValidatornatorSchemaBase extends sfValidatorSchema
   {
     return $this[$name];
   }
-  
+
   /**
    * @see sfValidatorSchema::offsetSet()
    */
@@ -36,7 +36,7 @@ class sfValidatornatorSchemaBase extends sfValidatorSchema
   {
     $this[$name] = $validator;
   }
-  
+
   /**
    * @see sfValidatorSchema::offsetUnset()
    */

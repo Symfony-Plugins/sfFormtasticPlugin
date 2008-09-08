@@ -28,14 +28,14 @@ class sfWidgetasticFormDate extends sfWidgetFormDate
   protected function configure($options = array(), $attributes = array())
   {
     parent::configure($options, $attributes);
-    
+
     $this->addOption('year_from');
     $this->addOption('year_to');
     $this->addOption('year_format', '%Y');
     $this->addOption('month_format', '%m');
     $this->addOption('day_format', '%d');
   }
-  
+
   /**
    * @see sfWidgetFormDate
    */
@@ -44,7 +44,7 @@ class sfWidgetasticFormDate extends sfWidgetFormDate
     $monthFormat = $this->getFormatOption('month_format');
     $dayFormat   = $this->getFormatOption('day_format');
     $yearFormat  = $this->getFormatOption('year_format');
-    
+
     // year_from and year_to
     $yearFrom = $this->getOption('year_from');
     $yearTo   = $this->getOption('year_to');
@@ -52,14 +52,14 @@ class sfWidgetasticFormDate extends sfWidgetFormDate
     {
       $yearFrom = is_null($yearFrom) ? date('Y') : (ctype_digit($yearFrom) ? $yearFrom : date('Y', strtotime($yearFrom)));
       $yearTo   = is_null($yearTo)   ? date('Y') : (ctype_digit($yearTo)   ? $yearTo   : date('Y', strtotime($yearTo)));
-      
+
       $yearRange = range($yearFrom, $yearTo);
     }
     else
     {
       $yearRange = range(date('Y') - 5, date('Y') + 5);
     }
-    
+
     // year_format
     $years = array();
     foreach ($yearRange as $year)
@@ -67,7 +67,7 @@ class sfWidgetasticFormDate extends sfWidgetFormDate
       $years[$year] = strftime($yearFormat, strtotime($year.'-01-01'));
     }
     $this->setOption('years', $years);
-    
+
     // month_format
     $months = array();
     foreach (range(1, 12) as $month)
@@ -75,7 +75,7 @@ class sfWidgetasticFormDate extends sfWidgetFormDate
       $months[$month] = strftime($monthFormat, strtotime(sprintf('2000-%02d-01', $month)));
     }
     $this->setOption('months', $months);
-    
+
     // day_format
     $days = array();
     foreach (range(1, 31) as $day)
@@ -83,10 +83,10 @@ class sfWidgetasticFormDate extends sfWidgetFormDate
       $days[$day] = strftime($dayFormat, strtotime(sprintf('2000-01-%02d', $day)));
     }
     $this->setOption('days', $days);
-    
+
     return parent::render($name, $value, $attributes, $errors);
   }
-  
+
   /**
    * Get an option value to be used with {@link strftime()}.
    * 
@@ -97,12 +97,12 @@ class sfWidgetasticFormDate extends sfWidgetFormDate
   protected function getFormatOption($name)
   {
     $value = $this->getOption($name);
-    
+
     if ($value && '%' != $value{0})
     {
       $value = '%'.$value;
     }
-    
+
     return $value;
   }
 }

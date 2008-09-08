@@ -19,12 +19,12 @@ class sfWidgetasticFormTextarea extends sfWidgetFormTextarea
     {
       $attributes['rows'] = '';
     }
-    
+
     if (!isset($attributes['cols']))
     {
       $attributes['cols'] = '';
     }
-    
+
     parent::__construct($options, $attributes);
   }
 }

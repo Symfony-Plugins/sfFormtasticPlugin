@@ -25,7 +25,7 @@ class sfValidatornatorErrorSchema extends sfValidatornatorErrorSchemaBase
     {
       throw new RuntimeException(sprintf('The json_encoder_callable "%s" does not exist.', var_export($callable, true)));
     }
-    
+
     // build an array of scalars
     $data = array();
     foreach ($this->globalErrors as $error)
@@ -44,7 +44,7 @@ class sfValidatornatorErrorSchema extends sfValidatornatorErrorSchemaBase
       }
       $data[$name][] = $error->getMessage();
     }
-    
+
     return call_user_func($callable, $data);
   }
 }

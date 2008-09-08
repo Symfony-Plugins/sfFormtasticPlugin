@@ -22,7 +22,7 @@ class myForm extends sfFormtastic
       'textarea'      => new sfWidgetasticFormTextarea,
       'time'          => new sfWidgetasticFormTime,
     ));
-    
+
     foreach ($this->widgetSchema as $field => $widget)
     {
       $this->validatorSchema[$field] = new sfValidatorPass;
