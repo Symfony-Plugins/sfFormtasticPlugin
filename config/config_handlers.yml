@@ -1,0 +1,3 @@
+form/*.yml:
+  class:  sfFormtasticYamlConfigHandler
+  file:   <?php echo realpath(dirname(__FILE__).'/..') ?>/lib/config/sfFormtasticYamlConfigHandler.class.php
